@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { motion } from 'motion/react';
+import { Easing, motion } from 'motion/react';
 import type { AppConfig } from '@/app-config';
 import { ChatTranscript } from '@/components/app/chat-transcript';
 import { PreConnectMessage } from '@/components/app/preconnect-message';
 import { TileLayout } from '@/components/app/tile-layout';
+import { BeverageDisplay } from '@/components/app/beverage-display';
 import {
   AgentControlBar,
   type ControlBarControls,
@@ -36,7 +37,7 @@ const BOTTOM_VIEW_MOTION_PROPS = {
   transition: {
     duration: 0.3,
     delay: 0.5,
-    ease: 'easeOut',
+    ease: 'easeOut' as Easing,
   },
 };
 
@@ -111,6 +112,11 @@ export const SessionView = ({
 
       {/* Tile Layout */}
       <TileLayout chatOpen={chatOpen} />
+
+      {/* Beverage Display - Coffee Visualization */}
+      <div className="fixed top-24 right-4 z-40 max-w-xs">
+        <BeverageDisplay className="max-h-[60vh] overflow-y-auto" />
+      </div>
 
       {/* Bottom */}
       <MotionBottom
