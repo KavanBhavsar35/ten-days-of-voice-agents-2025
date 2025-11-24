@@ -26,238 +26,242 @@ logger = logging.getLogger("agent")
 
 load_dotenv(".env.local")
 
-# Order state structure
-current_order = {
-    "drinkType": None,
-    "size": None,
-    "milk": None,
-    "extras": [],
-    "name": None
+# Wellness check-in state
+current_checkin = {
+    "mood": None,
+    "energy": None,
+    "stress": None,
+    "objectives": [],
+    "notes": None
 }
-
-# Store all orders during session
-order_history = []
 
 # Store room reference for publishing data
 current_room = None
 
+# Wellness log file path
+WELLNESS_LOG_FILE = Path("wellness_log.json")
+
 
 class Assistant(Agent):
-    def __init__(self) -> None:
+    def __init__(self, previous_context: str = "") -> None:
+        # Build instructions with previous context if available
+        base_instructions = """You are a supportive, grounded health and wellness companion. 
+            You conduct daily check-ins with users about their mood, energy, and daily goals.
+            
+            Your role is to:
+            1. Ask about mood and energy in a caring, conversational way
+            2. Inquire about any stress or concerns (without diagnosing)
+            3. Ask about 1-3 objectives or intentions for the day
+            4. Offer simple, realistic, and actionable advice
+            5. Close with a brief recap and confirmation
+            
+            IMPORTANT GUIDELINES:
+            - Be supportive and empathetic, but realistic
+            - NEVER diagnose medical conditions or provide medical advice
+            - Keep suggestions small, actionable, and grounded
+            - Focus on practical self-care: short breaks, walks, breathing, small steps
+            - Use a warm, conversational tone
+            - Keep check-ins brief and focused (5-10 minutes)
+            - Reference previous check-ins when available
+            
+            CONVERSATION FLOW:
+            1. Greet warmly and ask about mood/energy
+            2. Ask about any stress or concerns
+            3. Ask about 1-3 goals or intentions for today
+            4. Offer one small piece of practical advice or reflection
+            5. Recap: mood, energy, objectives, and confirm
+            6. Use complete_checkin tool to save the data
+            
+            Your responses should be natural, concise, and conversational."""
+        
+        full_instructions = base_instructions + previous_context
+        
         super().__init__(
-            instructions="""You are a friendly barista at Murf's Coffee House, the finest coffee shop in town! 
-            You are warm, enthusiastic, and passionate about coffee. The user is interacting with you via voice.
-            
-            Your job is to help customers place their coffee orders. For each order, you need to collect:
-            1. Drink type (e.g., latte, cappuccino, americano, espresso, mocha, cold brew, frappuccino, etc.)
-            2. Size (small, medium, or large)
-            3. Milk preference (whole milk, skim milk, oat milk, almond milk, soy milk, or none)
-            4. Extras (whipped cream, extra shot, vanilla syrup, caramel syrup, chocolate syrup, cinnamon, etc.) - optional
-            5. Customer's name for the order
-            
-            IMPORTANT: When the customer provides multiple pieces of information in one sentence, extract ALL the details and use the appropriate tools for each piece of information in the SAME response. For example, if they say "I want a large latte with oat milk", immediately call set_drink_type, set_size, and set_milk tools.
-            
-            Ask friendly, clarifying questions for any MISSING information only.
-            Once you have drink type, size, milk, and name, use the complete_order tool immediately.
-            Extras are optional - if the customer says "no extras" or "nothing else", proceed to complete the order.
-            
-            Your responses should be concise, natural, and conversational without complex formatting or symbols.
-            Be helpful and make suggestions if customers are unsure what to order!""",
+            instructions=full_instructions,
         )
 
     @function_tool
-    async def set_drink_type(self, context: RunContext, drink_type: Annotated[str, "The type of coffee drink (e.g., latte, cappuccino, americano, espresso, mocha, cold brew)"]):
-        """Set the type of drink for the current order.
+    async def set_mood(self, context: RunContext, mood: Annotated[str, "User's current mood or emotional state"]):
+        """Record the user's current mood.
         
         Args:
-            drink_type: The type of coffee drink the customer wants
+            mood: How the user is feeling today (e.g., good, tired, stressed, energized, calm)
         """
-        current_order["drinkType"] = drink_type
-        logger.info(f"Drink type set to: {drink_type}")
-        # Publish order update to frontend
+        current_checkin["mood"] = mood
+        logger.info(f"Mood set to: {mood}")
+        # Publish check-in update to frontend
         try:
             if current_room:
                 await current_room.local_participant.publish_data(
                     json.dumps({
-                        "type": "order_update", 
-                        "order": current_order,
-                        "history": order_history
+                        "type": "checkin_update",
+                        "checkin": current_checkin
                     }).encode(),
-                    topic="coffee-order"
+                    topic="wellness-checkin"
                 )
         except Exception as e:
-            logger.warning(f"Failed to publish order update: {e}")
-        return f"Got it! A {drink_type}. What size would you like - small, medium, or large?"
+            logger.warning(f"Failed to publish checkin update: {e}")
+        return f"I hear you're feeling {mood} today. Tell me, how's your energy level?"
     
     @function_tool
-    async def set_size(self, context: RunContext, size: Annotated[str, "The size of the drink: small, medium, or large"]):
-        """Set the size for the current order.
+    async def set_energy(self, context: RunContext, energy: Annotated[str, "User's energy level"]):
+        """Record the user's energy level.
         
         Args:
-            size: The size of the drink (small, medium, or large)
+            energy: The user's current energy level (e.g., high, low, medium, drained, energized)
         """
-        current_order["size"] = size.lower()
-        logger.info(f"Size set to: {size}")
-        # Publish order update to frontend
+        current_checkin["energy"] = energy
+        logger.info(f"Energy set to: {energy}")
+        # Publish check-in update to frontend
         try:
             if current_room:
                 await current_room.local_participant.publish_data(
                     json.dumps({
-                        "type": "order_update", 
-                        "order": current_order,
-                        "history": order_history
+                        "type": "checkin_update",
+                        "checkin": current_checkin
                     }).encode(),
-                    topic="coffee-order"
+                    topic="wellness-checkin"
                 )
         except Exception as e:
-            logger.warning(f"Failed to publish order update: {e}")
-        return f"Perfect! A {size} {current_order.get('drinkType', 'drink')}. What kind of milk would you like?"
+            logger.warning(f"Failed to publish checkin update: {e}")
+        return f"Got it, your energy is {energy}. Is there anything stressing you out or on your mind right now?"
     
     @function_tool
-    async def set_milk(self, context: RunContext, milk: Annotated[str, "The type of milk: whole milk, skim milk, oat milk, almond milk, soy milk, or none"]):
-        """Set the milk preference for the current order.
+    async def set_stress(self, context: RunContext, stress: Annotated[str, "What is stressing the user or their concerns"]):
+        """Record any stress or concerns the user mentions.
         
         Args:
-            milk: The type of milk preference
+            stress: What's causing stress or concern for the user
         """
-        current_order["milk"] = milk.lower()
-        logger.info(f"Milk set to: {milk}")
-        # Publish order update to frontend
+        current_checkin["stress"] = stress
+        logger.info(f"Stress noted: {stress}")
+        # Publish check-in update to frontend
         try:
             if current_room:
                 await current_room.local_participant.publish_data(
                     json.dumps({
-                        "type": "order_update", 
-                        "order": current_order,
-                        "history": order_history
+                        "type": "checkin_update",
+                        "checkin": current_checkin
                     }).encode(),
-                    topic="coffee-order"
+                    topic="wellness-checkin"
                 )
         except Exception as e:
-            logger.warning(f"Failed to publish order update: {e}")
-        return f"Noted! {milk}. Would you like any extras like whipped cream, extra shot, or flavored syrups?"
+            logger.warning(f"Failed to publish checkin update: {e}")
+        return f"I understand. {stress} can definitely be challenging. What are 1-3 things you'd like to accomplish or focus on today?"
     
     @function_tool
-    async def add_extra(self, context: RunContext, extra: Annotated[str, "An extra item to add (e.g., whipped cream, extra shot, vanilla syrup, caramel syrup, chocolate syrup, cinnamon)"]):
-        """Add an extra item to the current order.
+    async def add_objective(self, context: RunContext, objective: Annotated[str, "A goal or intention for today"]):
+        """Add an objective or intention for the day.
         
         Args:
-            extra: The extra item to add to the drink
+            objective: Something the user wants to accomplish or focus on today
         """
-        if extra.lower() not in current_order["extras"]:
-            current_order["extras"].append(extra.lower())
-        logger.info(f"Added extra: {extra}. Current extras: {current_order['extras']}")
-        # Publish order update to frontend
+        if objective not in current_checkin["objectives"]:
+            current_checkin["objectives"].append(objective)
+        logger.info(f"Added objective: {objective}. Total objectives: {len(current_checkin['objectives'])}")
+        # Publish check-in update to frontend
         try:
             if current_room:
                 await current_room.local_participant.publish_data(
                     json.dumps({
-                        "type": "order_update", 
-                        "order": current_order,
-                        "history": order_history
+                        "type": "checkin_update",
+                        "checkin": current_checkin
                     }).encode(),
-                    topic="coffee-order"
+                    topic="wellness-checkin"
                 )
         except Exception as e:
-            logger.warning(f"Failed to publish order update: {e}")
-        return f"Added {extra}! Anything else you'd like to add?"
+            logger.warning(f"Failed to publish checkin update: {e}")
+        
+        if len(current_checkin["objectives"]) >= 3:
+            return f"Great! So you have: {', '.join(current_checkin['objectives'])}. That sounds like a solid plan. Would you like me to recap everything?"
+        else:
+            return f"Got it - {objective}. Any other goals for today?"
     
     @function_tool
-    async def set_customer_name(self, context: RunContext, name: Annotated[str, "The customer's name for the order"]):
-        """Set the customer's name for the current order.
+    async def add_note(self, context: RunContext, note: Annotated[str, "Additional notes or reflections from the user"]):
+        """Add additional notes or reflections.
         
         Args:
-            name: The customer's name
+            note: Any additional thoughts, reflections, or context the user wants to share
         """
-        current_order["name"] = name
-        logger.info(f"Customer name set to: {name}")
-        # Publish order update to frontend
+        current_checkin["notes"] = note
+        logger.info(f"Note added: {note}")
+        # Publish check-in update to frontend
         try:
             if current_room:
                 await current_room.local_participant.publish_data(
                     json.dumps({
-                        "type": "order_update", 
-                        "order": current_order,
-                        "history": order_history
+                        "type": "checkin_update",
+                        "checkin": current_checkin
                     }).encode(),
-                    topic="coffee-order"
+                    topic="wellness-checkin"
                 )
         except Exception as e:
-            logger.warning(f"Failed to publish order update: {e}")
-        return f"Great! I have your name as {name}. Let me complete your order now."
+            logger.warning(f"Failed to publish checkin update: {e}")
+        return f"Thanks for sharing that. I've noted it down."
     
     @function_tool
-    async def complete_order(self, context: RunContext):
-        """Complete and save the order to a JSON file. Use this when all order details are collected."""
+    async def complete_checkin(self, context: RunContext):
+        """Complete the wellness check-in and save it to the log file."""
         try:
-            # Validate that all required fields are filled
-            missing_fields = []
-            if not current_order["drinkType"]:
-                missing_fields.append("drink type")
-            if not current_order["size"]:
-                missing_fields.append("size")
-            if not current_order["milk"]:
-                missing_fields.append("milk preference")
-            if not current_order["name"]:
-                missing_fields.append("customer name")
+            # Load existing log
+            if WELLNESS_LOG_FILE.exists():
+                with open(WELLNESS_LOG_FILE, "r") as f:
+                    log_data = json.load(f)
+            else:
+                log_data = {"check_ins": []}
             
-            if missing_fields:
-                return f"I still need to know: {', '.join(missing_fields)}. Can you provide that information?"
-            
-            # Create orders directory if it doesn't exist
-            orders_dir = Path("orders")
-            orders_dir.mkdir(exist_ok=True)
-            
-            # Generate filename with timestamp
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = orders_dir / f"order_{current_order['name']}_{timestamp}.json"
-            
-            # Save order to JSON file
-            order_data = {
-                **current_order,
+            # Create check-in entry
+            checkin_entry = {
+                "date": datetime.now().strftime("%Y-%m-%d"),
+                "time": datetime.now().strftime("%H:%M:%S"),
                 "timestamp": datetime.now().isoformat(),
-                "status": "completed"
+                "mood": current_checkin["mood"],
+                "energy": current_checkin["energy"],
+                "stress": current_checkin["stress"],
+                "objectives": current_checkin["objectives"],
+                "notes": current_checkin["notes"],
+                "summary": f"Mood: {current_checkin['mood']}, Energy: {current_checkin['energy']}, Objectives: {len(current_checkin['objectives'])}"
             }
             
-            with open(filename, "w") as f:
-                json.dump(order_data, f, indent=2)
+            # Add to log
+            log_data["check_ins"].append(checkin_entry)
             
-            logger.info(f"Order saved to {filename}: {order_data}")
+            # Save to file
+            with open(WELLNESS_LOG_FILE, "w") as f:
+                json.dump(log_data, f, indent=2)
             
-            # Save completed order to history
-            order_history.append(order_data.copy())
+            logger.info(f"Check-in saved: {checkin_entry}")
             
-            # Publish final order to frontend with history
+            # Publish final check-in to frontend
             try:
                 if current_room:
                     await current_room.local_participant.publish_data(
                         json.dumps({
-                            "type": "order_complete", 
-                            "order": order_data,
-                            "history": order_history
+                            "type": "checkin_complete",
+                            "checkin": current_checkin
                         }).encode(),
-                        topic="coffee-order"
+                        topic="wellness-checkin"
                     )
-                    logger.info("Published order_complete to frontend with history")
+                    logger.info("Published checkin_complete to frontend")
             except Exception as e:
-                logger.warning(f"Failed to publish order complete: {e}")
+                logger.warning(f"Failed to publish checkin complete: {e}")
             
-            # Create order summary
-            extras_text = ", ".join(current_order["extras"]) if current_order["extras"] else "no extras"
-            summary = f"""Perfect! I've placed your order, {current_order['name']}!
+            # Create recap
+            objectives_text = ", ".join(current_checkin["objectives"]) if current_checkin["objectives"] else "no specific objectives"
+            recap = f"""Perfect! Let me recap:
             
-Your order: {current_order['size']} {current_order['drinkType']} with {current_order['milk']}, {extras_text}.
+Mood: {current_checkin['mood']}
+Energy: {current_checkin['energy']}
+{f"Stress: {current_checkin['stress']}" if current_checkin['stress'] else ""}
+Objectives: {objectives_text}
             
-Your order has been saved and will be ready shortly. Thank you for choosing Murf's Coffee House!"""
+Does this sound right? Remember, break things into small steps and be kind to yourself today."""
             
-            # Note: Current order state persists until session ends - no reset here
-            # This allows the beverage visualization to remain visible
-            # Order history is maintained throughout the session
-            
-            return summary
+            return recap
         except Exception as e:
-            logger.error(f"Error in complete_order: {e}", exc_info=True)
-            return f"I apologize, but I encountered an error completing your order. However, I have all your details saved: {order_state['size']} {order_state['drinkType']} with {order_state['milk']} for {order_state['name']}. Let me try again!"
+            logger.error(f"Error in complete_checkin: {e}", exc_info=True)
+            return "I apologize, but I had trouble saving your check-in. However, I've noted everything you shared. Take care today!"
 
 
 def prewarm(proc: JobProcess):
@@ -265,16 +269,28 @@ def prewarm(proc: JobProcess):
 
 
 async def entrypoint(ctx: JobContext):
-    global current_room, current_order, order_history
+    global current_room, current_checkin
     current_room = ctx.room
     
-    # Reset order state when session starts
-    current_order["drinkType"] = None
-    current_order["size"] = None
-    current_order["milk"] = None
-    current_order["extras"] = []
-    current_order["name"] = None
-    order_history = []  # Reset order history for new session
+    # Reset check-in state when session starts
+    current_checkin["mood"] = None
+    current_checkin["energy"] = None
+    current_checkin["stress"] = None
+    current_checkin["objectives"] = []
+    current_checkin["notes"] = None
+    
+    # Load previous check-ins for context
+    previous_context = ""
+    if WELLNESS_LOG_FILE.exists():
+        try:
+            with open(WELLNESS_LOG_FILE, "r") as f:
+                log_data = json.load(f)
+            if log_data.get("check_ins"):
+                last_checkin = log_data["check_ins"][-1]
+                previous_context = f"\n\nPREVIOUS CHECK-IN CONTEXT: Last time (on {last_checkin['date']}), the user mentioned: Mood was '{last_checkin['mood']}', Energy was '{last_checkin['energy']}'. Reference this naturally in your greeting to show continuity."
+                logger.info(f"Loaded previous check-in context: {last_checkin['date']}")
+        except Exception as e:
+            logger.warning(f"Could not load previous check-ins: {e}")
     
     # Logging setup
     # Add any other context you want in all log entries here
@@ -343,8 +359,10 @@ async def entrypoint(ctx: JobContext):
     # await avatar.start(session, room=ctx.room)
 
     # Start the session, which initializes the voice pipeline and warms up the models
+    assistant = Assistant(previous_context=previous_context)
+    
     await session.start(
-        agent=Assistant(),
+        agent=assistant,
         room=ctx.room,
         room_input_options=RoomInputOptions(
             # For telephony applications, use `BVCTelephony` for best results
