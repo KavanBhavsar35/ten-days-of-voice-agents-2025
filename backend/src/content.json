@@ -1,0 +1,32 @@
+[
+    {
+        "id": "variables",
+        "title": "Variables",
+        "summary": "Variables are like labeled containers that store values in programming. They allow you to save data and reuse it later in your code. For example, you might store a person's name in a variable called 'name' or their age in a variable called 'age'. Variables make your code flexible and reusable because you can change the value stored in them without rewriting your entire program.",
+        "sample_question": "What is a variable and why is it useful in programming?"
+    },
+    {
+        "id": "loops",
+        "title": "Loops",
+        "summary": "Loops are programming structures that let you repeat an action multiple times without writing the same code over and over. There are two main types: 'for' loops, which run a specific number of times, and 'while' loops, which run as long as a condition is true. For example, if you want to print numbers 1 through 10, you'd use a loop instead of writing 10 separate print statements.",
+        "sample_question": "Explain the difference between a for loop and a while loop, and give an example of when you'd use each."
+    },
+    {
+        "id": "functions",
+        "title": "Functions",
+        "summary": "Functions are reusable blocks of code that perform a specific task. They help you organize your code and avoid repetition. A function can take inputs (called parameters), do something with them, and return a result. For example, you might create a function called 'add' that takes two numbers and returns their sum. Once defined, you can call this function whenever you need to add numbers.",
+        "sample_question": "What is a function and how does it make your code better?"
+    },
+    {
+        "id": "conditionals",
+        "title": "Conditional Statements",
+        "summary": "Conditional statements let your program make decisions based on certain conditions. The most common is the 'if' statement, which runs code only if a condition is true. You can also use 'else' for what happens when the condition is false, and 'elif' (else if) to check multiple conditions. For example, you might check if a user's age is over 18 to determine if they can vote.",
+        "sample_question": "Explain how if-else statements work and give a real-world example of when you'd use them."
+    },
+    {
+        "id": "arrays",
+        "title": "Arrays and Lists",
+        "summary": "Arrays (or lists in Python) are collections that store multiple values in a single variable. Instead of creating separate variables for each item, you can group related items together. For example, instead of having variables for student1, student2, student3, you can have one 'students' list containing all names. You can access individual items using their position (index) in the list, starting from 0.",
+        "sample_question": "What is an array or list, and how do you access individual items in it?"
+    }
+]

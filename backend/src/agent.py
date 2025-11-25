@@ -1,378 +1,273 @@
+# ======================================================
+# 🧠 DAY 4: TEACH-THE-TUTOR (AI EDITION)
+# 👨‍⚕️ Tutorial by Dr. Abhishek
+# 🚀 Features: Variables, Loops, Functions, Conditionals, Arrays
+# ======================================================
+
 import logging
 import json
-from datetime import datetime
-from pathlib import Path
-from typing import Annotated
+import os
+import asyncio
+from typing import Annotated, Literal, Optional
+from dataclasses import dataclass
+
+print("\n" + "🧬" * 50)
+print("🚀 AI TUTOR - DAY 4 TUTORIAL")
+print("💡 agent.py LOADED SUCCESSFULLY!")
+print("🧬" * 50 + "\n")
 
 from dotenv import load_dotenv
+from pydantic import Field
 from livekit.agents import (
     Agent,
     AgentSession,
     JobContext,
     JobProcess,
-    MetricsCollectedEvent,
     RoomInputOptions,
     WorkerOptions,
     cli,
-    metrics,
-    tokenize,
     function_tool,
-    RunContext
+    RunContext,
 )
+
+# 🔌 PLUGINS
 from livekit.plugins import murf, silero, google, deepgram, noise_cancellation
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 
 logger = logging.getLogger("agent")
-
 load_dotenv(".env.local")
 
-# Wellness check-in state
-current_checkin = {
-    "mood": None,
-    "energy": None,
-    "stress": None,
-    "objectives": [],
-    "notes": None
-}
+# ======================================================
+# 📚 KNOWLEDGE BASE (AI DATA)
+# ======================================================
 
-# Store room reference for publishing data
-current_room = None
+# 🆕 Renamed file so it generates fresh data for you
+CONTENT_FILE = "content.json" 
 
-# Wellness log file path
-WELLNESS_LOG_FILE = Path("wellness_log.json")
+# 🧬 NEW AI QUESTIONS
+DEFAULT_CONTENT = [
+    {
+        "id": "variables",
+        "title": "Variables",
+        "summary": "Variables are like labeled containers that store values in programming. They allow you to save data and reuse it later in your code. For example, you might store a person's name in a variable called 'name' or their age in a variable called 'age'. Variables make your code flexible and reusable because you can change the value stored in them without rewriting your entire program.",
+        "sample_question": "What is a variable and why is it useful in programming?"
+    },
+    {
+        "id": "loops",
+        "title": "Loops",
+        "summary": "Loops are programming structures that let you repeat an action multiple times without writing the same code over and over. There are two main types: 'for' loops, which run a specific number of times, and 'while' loops, which run as long as a condition is true. For example, if you want to print numbers 1 through 10, you'd use a loop instead of writing 10 separate print statements.",
+        "sample_question": "Explain the difference between a for loop and a while loop, and give an example of when you'd use each."
+    },
+    {
+        "id": "functions",
+        "title": "Functions",
+        "summary": "Functions are reusable blocks of code that perform a specific task. They help you organize your code and avoid repetition. A function can take inputs (called parameters), do something with them, and return a result. For example, you might create a function called 'add' that takes two numbers and returns their sum. Once defined, you can call this function whenever you need to add numbers.",
+        "sample_question": "What is a function and how does it make your code better?"
+    },
+    {
+        "id": "conditionals",
+        "title": "Conditional Statements",
+        "summary": "Conditional statements let your program make decisions based on certain conditions. The most common is the 'if' statement, which runs code only if a condition is true. You can also use 'else' for what happens when the condition is false, and 'elif' (else if) to check multiple conditions. For example, you might check if a user's age is over 18 to determine if they can vote.",
+        "sample_question": "Explain how if-else statements work and give a real-world example of when you'd use them."
+    },
+    {
+        "id": "arrays",
+        "title": "Arrays and Lists",
+        "summary": "Arrays (or lists in Python) are collections that store multiple values in a single variable. Instead of creating separate variables for each item, you can group related items together. For example, instead of having variables for student1, student2, student3, you can have one 'students' list containing all names. You can access individual items using their position (index) in the list, starting from 0.",
+        "sample_question": "What is an array or list, and how do you access individual items in it?"
+    }
+]
 
-
-class Assistant(Agent):
-    def __init__(self, previous_context: str = "") -> None:
-        # Build instructions with previous context if available
-        base_instructions = """You are a supportive, grounded health and wellness companion. 
-            You conduct daily check-ins with users about their mood, energy, and daily goals.
-            
-            Your role is to:
-            1. Ask about mood and energy in a caring, conversational way
-            2. Inquire about any stress or concerns (without diagnosing)
-            3. Ask about 1-3 objectives or intentions for the day
-            4. Offer simple, realistic, and actionable advice
-            5. Close with a brief recap and confirmation
-            
-            IMPORTANT GUIDELINES:
-            - Be supportive and empathetic, but realistic
-            - NEVER diagnose medical conditions or provide medical advice
-            - Keep suggestions small, actionable, and grounded
-            - Focus on practical self-care: short breaks, walks, breathing, small steps
-            - Use a warm, conversational tone
-            - Keep check-ins brief and focused (5-10 minutes)
-            - Reference previous check-ins when available
-            
-            CONVERSATION FLOW:
-            1. Greet warmly and ask about mood/energy
-            2. Ask about any stress or concerns
-            3. Ask about 1-3 goals or intentions for today
-            4. Offer one small piece of practical advice or reflection
-            5. Recap: mood, energy, objectives, and confirm
-            6. Use complete_checkin tool to save the data
-            
-            Your responses should be natural, concise, and conversational."""
+def load_content():
+    """
+    📖 Checks if content JSON exists. 
+    If NO: Generates it from DEFAULT_CONTENT.
+    If YES: Loads it.
+    """
+    try:
+        path = os.path.join(os.path.dirname(__file__), CONTENT_FILE)
         
-        full_instructions = base_instructions + previous_context
+        # Check if file exists
+        if not os.path.exists(path):
+            print(f"⚠️ {CONTENT_FILE} not found. Generating content data...")
+            with open(path, "w", encoding='utf-8') as f:
+                json.dump(DEFAULT_CONTENT, f, indent=4)
+            print("✅ Content file created successfully.")
+            
+        # Read the file
+        with open(path, "r", encoding='utf-8') as f:
+            data = json.load(f)
+            return data
+            
+    except Exception as e:
+        print(f"⚠️ Error managing content file: {e}")
+        return []
+
+# Load data immediately on startup
+COURSE_CONTENT = load_content()
+
+# ======================================================
+# 🧠 STATE MANAGEMENT
+# ======================================================
+
+@dataclass
+class TutorState:
+    """🧠 Tracks the current learning context"""
+    current_topic_id: str | None = None
+    current_topic_data: dict | None = None
+    mode: Literal["learn", "quiz", "teach_back"] = "learn"
+    
+    def set_topic(self, topic_id: str):
+        # Find topic in loaded content
+        topic = next((item for item in COURSE_CONTENT if item["id"] == topic_id), None)
+        if topic:
+            self.current_topic_id = topic_id
+            self.current_topic_data = topic
+            return True
+        return False
+
+@dataclass
+class Userdata:
+    tutor_state: TutorState
+    agent_session: Optional[AgentSession] = None 
+
+# ======================================================
+# 🛠️ TUTOR TOOLS
+# ======================================================
+
+@function_tool
+async def select_topic(
+    ctx: RunContext[Userdata], 
+    topic_id: Annotated[str, Field(description="The ID of the topic to study (e.g., 'variables', 'loops', 'functions', 'conditionals', 'arrays')")]
+) -> str:
+    """📚 Selects a topic to study from the available list."""
+    state = ctx.userdata.tutor_state
+    success = state.set_topic(topic_id.lower())
+    
+    if success:
+        return f"Topic set to {state.current_topic_data['title']}. Ask the user if they want to 'Learn', be 'Quizzed', or 'Teach it back'."
+    else:
+        available = ", ".join([t["id"] for t in COURSE_CONTENT])
+        return f"Topic not found. Available topics are: {available}"
+
+@function_tool
+async def set_learning_mode(
+    ctx: RunContext[Userdata], 
+    mode: Annotated[str, Field(description="The mode to switch to: 'learn', 'quiz', or 'teach_back'")]
+) -> str:
+    """🔄 Switches the interaction mode and updates the agent's voice/persona."""
+    
+    # 1. Update State
+    state = ctx.userdata.tutor_state
+    state.mode = mode.lower()
+    
+    # 2. Switch Voice based on Mode
+    agent_session = ctx.userdata.agent_session 
+    
+    if agent_session:
+        if state.mode == "learn":
+            # 👨‍🏫 MATTHEW: The Lecturer
+            agent_session.tts.update_options(voice="en-US-matthew", style="Promo")
+            instruction = f"Mode: LEARN. Explain: {state.current_topic_data['summary']}"
+            
+        elif state.mode == "quiz":
+            # 👩‍🏫 ALICIA: The Examiner
+            agent_session.tts.update_options(voice="en-US-alicia", style="Conversational")
+            instruction = f"Mode: QUIZ. Ask this question: {state.current_topic_data['sample_question']}"
+            
+        elif state.mode == "teach_back":
+            # 👨‍🎓 KEN: The Student/Coach
+            agent_session.tts.update_options(voice="en-US-ken", style="Promo")
+            instruction = "Mode: TEACH_BACK. Ask the user to explain the concept to you as if YOU are the beginner."
+        else:
+            return "Invalid mode."
+    else:
+        instruction = "Voice switch failed (Session not found)."
+
+    print(f"🔄 SWITCHING MODE -> {state.mode.upper()}")
+    return f"Switched to {state.mode} mode. {instruction}"
+
+@function_tool
+async def evaluate_teaching(
+    ctx: RunContext[Userdata],
+    user_explanation: Annotated[str, Field(description="The explanation given by the user during teach-back")]
+) -> str:
+    """📝 call this when the user has finished explaining a concept in 'teach_back' mode."""
+    print(f"📝 EVALUATING EXPLANATION: {user_explanation}")
+    return "Analyze the user's explanation. Give them a score out of 10 on accuracy and clarity, and correct any mistakes."
+
+# ======================================================
+# 🧠 AGENT DEFINITION
+# ======================================================
+
+class TutorAgent(Agent):
+    def __init__(self):
+        # Generate list of topics for the prompt
+        topic_list = ", ".join([f"{t['id']} ({t['title']})" for t in COURSE_CONTENT])
         
         super().__init__(
-            instructions=full_instructions,
+            instructions=f"""
+            You are an AI Tutor designed to help users master programming concepts like Variables, Loops, Functions, Conditionals, and Arrays.
+            
+            📚 **AVAILABLE TOPICS:** {topic_list}
+            
+            🔄 **YOU HAVE 3 MODES:**
+            1. **LEARN Mode (Voice: Matthew):** You explain the concept clearly using the summary data.
+            2. **QUIZ Mode (Voice: Alicia):** You ask the user a specific question to test knowledge.
+            3. **TEACH_BACK Mode (Voice: Ken):** YOU pretend to be a student. Ask the user to explain the concept to you.
+            
+            ⚙️ **BEHAVIOR:**
+            - Start by asking what topic they want to study.
+            - Use the `set_learning_mode` tool immediately when the user asks to learn, take a quiz, or teach.
+            - In 'teach_back' mode, listen to their explanation and then use `evaluate_teaching` to give feedback.
+            """,
+            tools=[select_topic, set_learning_mode, evaluate_teaching],
         )
 
-    @function_tool
-    async def set_mood(self, context: RunContext, mood: Annotated[str, "User's current mood or emotional state"]):
-        """Record the user's current mood.
-        
-        Args:
-            mood: How the user is feeling today (e.g., good, tired, stressed, energized, calm)
-        """
-        current_checkin["mood"] = mood
-        logger.info(f"Mood set to: {mood}")
-        # Publish check-in update to frontend
-        try:
-            if current_room:
-                await current_room.local_participant.publish_data(
-                    json.dumps({
-                        "type": "checkin_update",
-                        "checkin": current_checkin
-                    }).encode(),
-                    topic="wellness-checkin"
-                )
-        except Exception as e:
-            logger.warning(f"Failed to publish checkin update: {e}")
-        return f"I hear you're feeling {mood} today. Tell me, how's your energy level?"
-    
-    @function_tool
-    async def set_energy(self, context: RunContext, energy: Annotated[str, "User's energy level"]):
-        """Record the user's energy level.
-        
-        Args:
-            energy: The user's current energy level (e.g., high, low, medium, drained, energized)
-        """
-        current_checkin["energy"] = energy
-        logger.info(f"Energy set to: {energy}")
-        # Publish check-in update to frontend
-        try:
-            if current_room:
-                await current_room.local_participant.publish_data(
-                    json.dumps({
-                        "type": "checkin_update",
-                        "checkin": current_checkin
-                    }).encode(),
-                    topic="wellness-checkin"
-                )
-        except Exception as e:
-            logger.warning(f"Failed to publish checkin update: {e}")
-        return f"Got it, your energy is {energy}. Is there anything stressing you out or on your mind right now?"
-    
-    @function_tool
-    async def set_stress(self, context: RunContext, stress: Annotated[str, "What is stressing the user or their concerns"]):
-        """Record any stress or concerns the user mentions.
-        
-        Args:
-            stress: What's causing stress or concern for the user
-        """
-        current_checkin["stress"] = stress
-        logger.info(f"Stress noted: {stress}")
-        # Publish check-in update to frontend
-        try:
-            if current_room:
-                await current_room.local_participant.publish_data(
-                    json.dumps({
-                        "type": "checkin_update",
-                        "checkin": current_checkin
-                    }).encode(),
-                    topic="wellness-checkin"
-                )
-        except Exception as e:
-            logger.warning(f"Failed to publish checkin update: {e}")
-        return f"I understand. {stress} can definitely be challenging. What are 1-3 things you'd like to accomplish or focus on today?"
-    
-    @function_tool
-    async def add_objective(self, context: RunContext, objective: Annotated[str, "A goal or intention for today"]):
-        """Add an objective or intention for the day.
-        
-        Args:
-            objective: Something the user wants to accomplish or focus on today
-        """
-        if objective not in current_checkin["objectives"]:
-            current_checkin["objectives"].append(objective)
-        logger.info(f"Added objective: {objective}. Total objectives: {len(current_checkin['objectives'])}")
-        # Publish check-in update to frontend
-        try:
-            if current_room:
-                await current_room.local_participant.publish_data(
-                    json.dumps({
-                        "type": "checkin_update",
-                        "checkin": current_checkin
-                    }).encode(),
-                    topic="wellness-checkin"
-                )
-        except Exception as e:
-            logger.warning(f"Failed to publish checkin update: {e}")
-        
-        if len(current_checkin["objectives"]) >= 3:
-            return f"Great! So you have: {', '.join(current_checkin['objectives'])}. That sounds like a solid plan. Would you like me to recap everything?"
-        else:
-            return f"Got it - {objective}. Any other goals for today?"
-    
-    @function_tool
-    async def add_note(self, context: RunContext, note: Annotated[str, "Additional notes or reflections from the user"]):
-        """Add additional notes or reflections.
-        
-        Args:
-            note: Any additional thoughts, reflections, or context the user wants to share
-        """
-        current_checkin["notes"] = note
-        logger.info(f"Note added: {note}")
-        # Publish check-in update to frontend
-        try:
-            if current_room:
-                await current_room.local_participant.publish_data(
-                    json.dumps({
-                        "type": "checkin_update",
-                        "checkin": current_checkin
-                    }).encode(),
-                    topic="wellness-checkin"
-                )
-        except Exception as e:
-            logger.warning(f"Failed to publish checkin update: {e}")
-        return f"Thanks for sharing that. I've noted it down."
-    
-    @function_tool
-    async def complete_checkin(self, context: RunContext):
-        """Complete the wellness check-in and save it to the log file."""
-        try:
-            # Load existing log
-            if WELLNESS_LOG_FILE.exists():
-                with open(WELLNESS_LOG_FILE, "r") as f:
-                    log_data = json.load(f)
-            else:
-                log_data = {"check_ins": []}
-            
-            # Create check-in entry
-            checkin_entry = {
-                "date": datetime.now().strftime("%Y-%m-%d"),
-                "time": datetime.now().strftime("%H:%M:%S"),
-                "timestamp": datetime.now().isoformat(),
-                "mood": current_checkin["mood"],
-                "energy": current_checkin["energy"],
-                "stress": current_checkin["stress"],
-                "objectives": current_checkin["objectives"],
-                "notes": current_checkin["notes"],
-                "summary": f"Mood: {current_checkin['mood']}, Energy: {current_checkin['energy']}, Objectives: {len(current_checkin['objectives'])}"
-            }
-            
-            # Add to log
-            log_data["check_ins"].append(checkin_entry)
-            
-            # Save to file
-            with open(WELLNESS_LOG_FILE, "w") as f:
-                json.dump(log_data, f, indent=2)
-            
-            logger.info(f"Check-in saved: {checkin_entry}")
-            
-            # Publish final check-in to frontend
-            try:
-                if current_room:
-                    await current_room.local_participant.publish_data(
-                        json.dumps({
-                            "type": "checkin_complete",
-                            "checkin": current_checkin
-                        }).encode(),
-                        topic="wellness-checkin"
-                    )
-                    logger.info("Published checkin_complete to frontend")
-            except Exception as e:
-                logger.warning(f"Failed to publish checkin complete: {e}")
-            
-            # Create recap
-            objectives_text = ", ".join(current_checkin["objectives"]) if current_checkin["objectives"] else "no specific objectives"
-            recap = f"""Perfect! Let me recap:
-            
-Mood: {current_checkin['mood']}
-Energy: {current_checkin['energy']}
-{f"Stress: {current_checkin['stress']}" if current_checkin['stress'] else ""}
-Objectives: {objectives_text}
-            
-Does this sound right? Remember, break things into small steps and be kind to yourself today."""
-            
-            return recap
-        except Exception as e:
-            logger.error(f"Error in complete_checkin: {e}", exc_info=True)
-            return "I apologize, but I had trouble saving your check-in. However, I've noted everything you shared. Take care today!"
-
+# ======================================================
+# 🎬 ENTRYPOINT
+# ======================================================
 
 def prewarm(proc: JobProcess):
     proc.userdata["vad"] = silero.VAD.load()
 
-
 async def entrypoint(ctx: JobContext):
-    global current_room, current_checkin
-    current_room = ctx.room
-    
-    # Reset check-in state when session starts
-    current_checkin["mood"] = None
-    current_checkin["energy"] = None
-    current_checkin["stress"] = None
-    current_checkin["objectives"] = []
-    current_checkin["notes"] = None
-    
-    # Load previous check-ins for context
-    previous_context = ""
-    if WELLNESS_LOG_FILE.exists():
-        try:
-            with open(WELLNESS_LOG_FILE, "r") as f:
-                log_data = json.load(f)
-            if log_data.get("check_ins"):
-                last_checkin = log_data["check_ins"][-1]
-                previous_context = f"\n\nPREVIOUS CHECK-IN CONTEXT: Last time (on {last_checkin['date']}), the user mentioned: Mood was '{last_checkin['mood']}', Energy was '{last_checkin['energy']}'. Reference this naturally in your greeting to show continuity."
-                logger.info(f"Loaded previous check-in context: {last_checkin['date']}")
-        except Exception as e:
-            logger.warning(f"Could not load previous check-ins: {e}")
-    
-    # Logging setup
-    # Add any other context you want in all log entries here
-    ctx.log_context_fields = {
-        "room": ctx.room.name,
-    }
+    ctx.log_context_fields = {"room": ctx.room.name}
 
-    # Set up a voice AI pipeline using OpenAI, Cartesia, AssemblyAI, and the LiveKit turn detector
+    print("\n" + "🧬" * 25)
+    print("🚀 STARTING AI TUTOR SESSION")
+    print(f"📚 Loaded {len(COURSE_CONTENT)} topics from Knowledge Base")
+    
+    # 1. Initialize State
+    userdata = Userdata(tutor_state=TutorState())
+
+    # 2. Setup Agent
     session = AgentSession(
-        # Speech-to-text (STT) is your agent's ears, turning the user's speech into text that the LLM can understand
-        # See all available models at https://docs.livekit.io/agents/models/stt/
         stt=deepgram.STT(model="nova-3"),
-        # A Large Language Model (LLM) is your agent's brain, processing user input and generating a response
-        # See all available models at https://docs.livekit.io/agents/models/llm/
-        llm=google.LLM(
-                model="gemini-2.5-flash",
-            ),
-        # Text-to-speech (TTS) is your agent's voice, turning the LLM's text into speech that the user can hear
-        # See all available models as well as voice selections at https://docs.livekit.io/agents/models/tts/
+        llm=google.LLM(model="gemini-2.5-flash"),
         tts=murf.TTS(
-                voice="en-US-matthew", 
-                style="Conversation",
-                tokenizer=tokenize.basic.SentenceTokenizer(min_sentence_len=2),
-                text_pacing=True
-            ),
-        # VAD and turn detection are used to determine when the user is speaking and when the agent should respond
-        # See more at https://docs.livekit.io/agents/build/turns
+            voice="en-US-matthew", 
+            style="Promo",        
+            text_pacing=True,
+        ),
         turn_detection=MultilingualModel(),
         vad=ctx.proc.userdata["vad"],
-        # allow the LLM to generate a response while waiting for the end of turn
-        # See more at https://docs.livekit.io/agents/build/audio/#preemptive-generation
-        preemptive_generation=True,
+        userdata=userdata,
     )
-
-    # To use a realtime model instead of a voice pipeline, use the following session setup instead.
-    # (Note: This is for the OpenAI Realtime API. For other providers, see https://docs.livekit.io/agents/models/realtime/))
-    # 1. Install livekit-agents[openai]
-    # 2. Set OPENAI_API_KEY in .env.local
-    # 3. Add `from livekit.plugins import openai` to the top of this file
-    # 4. Use the following session setup instead of the version above
-    # session = AgentSession(
-    #     llm=openai.realtime.RealtimeModel(voice="marin")
-    # )
-
-    # Metrics collection, to measure pipeline performance
-    # For more information, see https://docs.livekit.io/agents/build/metrics/
-    usage_collector = metrics.UsageCollector()
-
-    @session.on("metrics_collected")
-    def _on_metrics_collected(ev: MetricsCollectedEvent):
-        metrics.log_metrics(ev.metrics)
-        usage_collector.collect(ev.metrics)
-
-    async def log_usage():
-        summary = usage_collector.get_summary()
-        logger.info(f"Usage: {summary}")
-
-    ctx.add_shutdown_callback(log_usage)
-
-    # # Add a virtual avatar to the session, if desired
-    # # For other providers, see https://docs.livekit.io/agents/models/avatar/
-    # avatar = hedra.AvatarSession(
-    #   avatar_id="...",  # See https://docs.livekit.io/agents/models/avatar/plugins/hedra
-    # )
-    # # Start the avatar and wait for it to join
-    # await avatar.start(session, room=ctx.room)
-
-    # Start the session, which initializes the voice pipeline and warms up the models
-    assistant = Assistant(previous_context=previous_context)
     
+    # 3. Store session in userdata for tools to access
+    userdata.agent_session = session
+    
+    # 4. Start
     await session.start(
-        agent=assistant,
+        agent=TutorAgent(),
         room=ctx.room,
         room_input_options=RoomInputOptions(
-            # For telephony applications, use `BVCTelephony` for best results
-            noise_cancellation=noise_cancellation.BVC(),
+            noise_cancellation=noise_cancellation.BVC()
         ),
     )
 
-    # Join the room and connect to the user
     await ctx.connect()
-
 
 if __name__ == "__main__":
     cli.run_app(WorkerOptions(entrypoint_fnc=entrypoint, prewarm_fnc=prewarm))
