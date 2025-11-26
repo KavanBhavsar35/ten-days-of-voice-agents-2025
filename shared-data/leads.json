@@ -1,0 +1,46 @@
+[
+  {
+    "name": "Dave",
+    "company": null,
+    "email": null,
+    "role": null,
+    "use_case": "Accepting online payments and managing subscriptions",
+    "team_size": "10",
+    "timeline": null,
+    "questions_asked": [
+      "What does Razorpay do?",
+      "Razorpay pricing",
+      "Razorpay free tier"
+    ],
+    "conversation_summary": "The user, Dave from XYZ (team of 10), is interested in Razorpay for accepting online payments and managing subscriptions. He also inquired about a free tier. I've collected his name, company name, team size, and use case.",
+    "timestamp": "2025-11-25T23:53:28.734897"
+  },
+  {
+    "name": null,
+    "company": null,
+    "email": null,
+    "role": null,
+    "use_case": "transaction management",
+    "team_size": "100",
+    "timeline": null,
+    "questions_asked": [
+      "what does Razorpay do",
+      "plans for startups with incoming and outgoing payments",
+      "Razorpay Payment Gateway"
+    ],
+    "conversation_summary": "The lead is starting a tech business with a team of 100 people and needs a solution for both accepting one-time payments from customers (Payment Gateway) and managing payments to their team/vendors (Payouts). They are looking to implement a solution now. I was unable to collect their name and email address.",
+    "timestamp": "2025-11-25T23:59:09.497758"
+  },
+  {
+    "name": null,
+    "company": null,
+    "email": null,
+    "role": null,
+    "use_case": null,
+    "team_size": null,
+    "timeline": null,
+    "questions_asked": [],
+    "conversation_summary": "Jatin from Wonderful Tech is looking for a payment system for his startup (team of 10-12) to support web development, app development, and online courses. He wants to implement it right now. Discussed Razorpay's Payment Gateway, Subscriptions, and Payment Links as potential solutions.",
+    "timestamp": "2025-11-26T15:32:31.660358"
+  }
+]

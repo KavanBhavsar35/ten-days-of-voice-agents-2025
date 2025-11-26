@@ -1,273 +1,279 @@
-# ======================================================
-# 🧠 DAY 4: TEACH-THE-TUTOR (AI EDITION)
-# 👨‍⚕️ Tutorial by Dr. Abhishek
-# 🚀 Features: Variables, Loops, Functions, Conditionals, Arrays
-# ======================================================
-
 import logging
 import json
-import os
-import asyncio
-from typing import Annotated, Literal, Optional
-from dataclasses import dataclass
-
-print("\n" + "🧬" * 50)
-print("🚀 AI TUTOR - DAY 4 TUTORIAL")
-print("💡 agent.py LOADED SUCCESSFULLY!")
-print("🧬" * 50 + "\n")
+from datetime import datetime
+from pathlib import Path
+from typing import Annotated
 
 from dotenv import load_dotenv
-from pydantic import Field
 from livekit.agents import (
     Agent,
     AgentSession,
     JobContext,
     JobProcess,
+    MetricsCollectedEvent,
     RoomInputOptions,
     WorkerOptions,
     cli,
+    metrics,
+    tokenize,
     function_tool,
-    RunContext,
+    RunContext
 )
-
-# 🔌 PLUGINS
-from livekit.plugins import murf, silero, google, deepgram, noise_cancellation
+from livekit.plugins import silero, google, deepgram, noise_cancellation
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
+import murf_tts
 
-logger = logging.getLogger("agent")
+logger = logging.getLogger("sdr_agent")
+
 load_dotenv(".env.local")
 
-# ======================================================
-# 📚 KNOWLEDGE BASE (AI DATA)
-# ======================================================
+# Load company FAQ
+COMPANY_FAQ_FILE = Path("../shared-data/day5_company_faq.json")
+company_data = {}
+if COMPANY_FAQ_FILE.exists():
+    with open(COMPANY_FAQ_FILE, "r") as f:
+        company_data = json.load(f)
+        logger.info(f"Loaded company data for {company_data.get('company', {}).get('name', 'Unknown')}")
+else:
+    logger.warning(f"Company FAQ file not found: {COMPANY_FAQ_FILE}")
 
-# 🆕 Renamed file so it generates fresh data for you
-CONTENT_FILE = "content.json" 
+# Lead storage
+LEADS_FILE = Path("../shared-data/leads.json")
+lead_data = {
+    "name": None,
+    "company": None,
+    "email": None,
+    "role": None,
+    "use_case": None,
+    "team_size": None,
+    "timeline": None,
+    "questions_asked": [],
+    "conversation_summary": None,
+    "timestamp": None
+}
 
-# 🧬 NEW AI QUESTIONS
-DEFAULT_CONTENT = [
-    {
-        "id": "variables",
-        "title": "Variables",
-        "summary": "Variables are like labeled containers that store values in programming. They allow you to save data and reuse it later in your code. For example, you might store a person's name in a variable called 'name' or their age in a variable called 'age'. Variables make your code flexible and reusable because you can change the value stored in them without rewriting your entire program.",
-        "sample_question": "What is a variable and why is it useful in programming?"
-    },
-    {
-        "id": "loops",
-        "title": "Loops",
-        "summary": "Loops are programming structures that let you repeat an action multiple times without writing the same code over and over. There are two main types: 'for' loops, which run a specific number of times, and 'while' loops, which run as long as a condition is true. For example, if you want to print numbers 1 through 10, you'd use a loop instead of writing 10 separate print statements.",
-        "sample_question": "Explain the difference between a for loop and a while loop, and give an example of when you'd use each."
-    },
-    {
-        "id": "functions",
-        "title": "Functions",
-        "summary": "Functions are reusable blocks of code that perform a specific task. They help you organize your code and avoid repetition. A function can take inputs (called parameters), do something with them, and return a result. For example, you might create a function called 'add' that takes two numbers and returns their sum. Once defined, you can call this function whenever you need to add numbers.",
-        "sample_question": "What is a function and how does it make your code better?"
-    },
-    {
-        "id": "conditionals",
-        "title": "Conditional Statements",
-        "summary": "Conditional statements let your program make decisions based on certain conditions. The most common is the 'if' statement, which runs code only if a condition is true. You can also use 'else' for what happens when the condition is false, and 'elif' (else if) to check multiple conditions. For example, you might check if a user's age is over 18 to determine if they can vote.",
-        "sample_question": "Explain how if-else statements work and give a real-world example of when you'd use them."
-    },
-    {
-        "id": "arrays",
-        "title": "Arrays and Lists",
-        "summary": "Arrays (or lists in Python) are collections that store multiple values in a single variable. Instead of creating separate variables for each item, you can group related items together. For example, instead of having variables for student1, student2, student3, you can have one 'students' list containing all names. You can access individual items using their position (index) in the list, starting from 0.",
-        "sample_question": "What is an array or list, and how do you access individual items in it?"
-    }
-]
 
-def load_content():
-    """
-    📖 Checks if content JSON exists. 
-    If NO: Generates it from DEFAULT_CONTENT.
-    If YES: Loads it.
-    """
-    try:
-        path = os.path.join(os.path.dirname(__file__), CONTENT_FILE)
+def save_lead():
+    """Save the current lead data to JSON file"""
+    lead_data["timestamp"] = datetime.now().isoformat()
+    
+    # Load existing leads
+    leads = []
+    if LEADS_FILE.exists():
+        with open(LEADS_FILE, "r") as f:
+            try:
+                leads = json.load(f)
+            except:
+                leads = []
+    
+    # Add new lead
+    leads.append(lead_data.copy())
+    
+    # Save back
+    with open(LEADS_FILE, "w") as f:
+        json.dump(leads, f, indent=2)
+    
+    logger.info(f"Lead saved: {lead_data.get('name')} from {lead_data.get('company')}")
+
+
+def search_faq(query: str) -> str:
+    """Simple keyword search in FAQ"""
+    query_lower = query.lower()
+    
+    # Search in FAQ
+    for faq_item in company_data.get("faq", []):
+        question = faq_item["question"].lower()
+        answer = faq_item["answer"]
         
-        # Check if file exists
-        if not os.path.exists(path):
-            print(f"⚠️ {CONTENT_FILE} not found. Generating content data...")
-            with open(path, "w", encoding='utf-8') as f:
-                json.dump(DEFAULT_CONTENT, f, indent=4)
-            print("✅ Content file created successfully.")
-            
-        # Read the file
-        with open(path, "r", encoding='utf-8') as f:
-            data = json.load(f)
-            return data
-            
-    except Exception as e:
-        print(f"⚠️ Error managing content file: {e}")
-        return []
-
-# Load data immediately on startup
-COURSE_CONTENT = load_content()
-
-# ======================================================
-# 🧠 STATE MANAGEMENT
-# ======================================================
-
-@dataclass
-class TutorState:
-    """🧠 Tracks the current learning context"""
-    current_topic_id: str | None = None
-    current_topic_data: dict | None = None
-    mode: Literal["learn", "quiz", "teach_back"] = "learn"
+        # Simple keyword matching
+        if any(word in question for word in query_lower.split()):
+            return answer
     
-    def set_topic(self, topic_id: str):
-        # Find topic in loaded content
-        topic = next((item for item in COURSE_CONTENT if item["id"] == topic_id), None)
-        if topic:
-            self.current_topic_id = topic_id
-            self.current_topic_data = topic
-            return True
-        return False
-
-@dataclass
-class Userdata:
-    tutor_state: TutorState
-    agent_session: Optional[AgentSession] = None 
-
-# ======================================================
-# 🛠️ TUTOR TOOLS
-# ======================================================
-
-@function_tool
-async def select_topic(
-    ctx: RunContext[Userdata], 
-    topic_id: Annotated[str, Field(description="The ID of the topic to study (e.g., 'variables', 'loops', 'functions', 'conditionals', 'arrays')")]
-) -> str:
-    """📚 Selects a topic to study from the available list."""
-    state = ctx.userdata.tutor_state
-    success = state.set_topic(topic_id.lower())
+    # Search in products
+    for product in company_data.get("products", []):
+        if any(word in product["name"].lower() for word in query_lower.split()):
+            return f"{product['name']}: {product['description']} Best for: {product['use_case']}"
     
-    if success:
-        return f"Topic set to {state.current_topic_data['title']}. Ask the user if they want to 'Learn', be 'Quizzed', or 'Teach it back'."
-    else:
-        available = ", ".join([t["id"] for t in COURSE_CONTENT])
-        return f"Topic not found. Available topics are: {available}"
+    return None
 
-@function_tool
-async def set_learning_mode(
-    ctx: RunContext[Userdata], 
-    mode: Annotated[str, Field(description="The mode to switch to: 'learn', 'quiz', or 'teach_back'")]
-) -> str:
-    """🔄 Switches the interaction mode and updates the agent's voice/persona."""
-    
-    # 1. Update State
-    state = ctx.userdata.tutor_state
-    state.mode = mode.lower()
-    
-    # 2. Switch Voice based on Mode
-    agent_session = ctx.userdata.agent_session 
-    
-    if agent_session:
-        if state.mode == "learn":
-            # 👨‍🏫 MATTHEW: The Lecturer
-            agent_session.tts.update_options(voice="en-US-matthew", style="Promo")
-            instruction = f"Mode: LEARN. Explain: {state.current_topic_data['summary']}"
-            
-        elif state.mode == "quiz":
-            # 👩‍🏫 ALICIA: The Examiner
-            agent_session.tts.update_options(voice="en-US-alicia", style="Conversational")
-            instruction = f"Mode: QUIZ. Ask this question: {state.current_topic_data['sample_question']}"
-            
-        elif state.mode == "teach_back":
-            # 👨‍🎓 KEN: The Student/Coach
-            agent_session.tts.update_options(voice="en-US-ken", style="Promo")
-            instruction = "Mode: TEACH_BACK. Ask the user to explain the concept to you as if YOU are the beginner."
-        else:
-            return "Invalid mode."
-    else:
-        instruction = "Voice switch failed (Session not found)."
 
-    print(f"🔄 SWITCHING MODE -> {state.mode.upper()}")
-    return f"Switched to {state.mode} mode. {instruction}"
-
-@function_tool
-async def evaluate_teaching(
-    ctx: RunContext[Userdata],
-    user_explanation: Annotated[str, Field(description="The explanation given by the user during teach-back")]
-) -> str:
-    """📝 call this when the user has finished explaining a concept in 'teach_back' mode."""
-    print(f"📝 EVALUATING EXPLANATION: {user_explanation}")
-    return "Analyze the user's explanation. Give them a score out of 10 on accuracy and clarity, and correct any mistakes."
-
-# ======================================================
-# 🧠 AGENT DEFINITION
-# ======================================================
-
-class TutorAgent(Agent):
-    def __init__(self):
-        # Generate list of topics for the prompt
-        topic_list = ", ".join([f"{t['id']} ({t['title']})" for t in COURSE_CONTENT])
+class SDRAgent(Agent):
+    def __init__(self) -> None:
+        company_name = company_data.get("company", {}).get("name", "our company")
+        company_desc = company_data.get("company", {}).get("description", "")
         
         super().__init__(
-            instructions=f"""
-            You are an AI Tutor designed to help users master programming concepts like Variables, Loops, Functions, Conditionals, and Arrays.
-            
-            📚 **AVAILABLE TOPICS:** {topic_list}
-            
-            🔄 **YOU HAVE 3 MODES:**
-            1. **LEARN Mode (Voice: Matthew):** You explain the concept clearly using the summary data.
-            2. **QUIZ Mode (Voice: Alicia):** You ask the user a specific question to test knowledge.
-            3. **TEACH_BACK Mode (Voice: Ken):** YOU pretend to be a student. Ask the user to explain the concept to you.
-            
-            ⚙️ **BEHAVIOR:**
-            - Start by asking what topic they want to study.
-            - Use the `set_learning_mode` tool immediately when the user asks to learn, take a quiz, or teach.
-            - In 'teach_back' mode, listen to their explanation and then use `evaluate_teaching` to give feedback.
-            """,
-            tools=[select_topic, set_learning_mode, evaluate_teaching],
-        )
+            instructions=f"""You are a friendly and professional Sales Development Representative (SDR) for {company_name}.
 
-# ======================================================
-# 🎬 ENTRYPOINT
-# ======================================================
+COMPANY OVERVIEW:
+{company_desc}
+
+YOUR ROLE:
+1. Greet visitors warmly and professionally
+2. Ask what brought them here and what they're working on
+3. Understand their needs and pain points
+4. Answer questions about our products, pricing, and services using the FAQ
+5. Naturally collect lead information during the conversation
+6. When they're done, summarize the conversation and thank them
+
+LEAD INFORMATION TO COLLECT (ask naturally, don't interrogate):
+- Name
+- Company name
+- Email address
+- Their role/position
+- What they want to use our product for (use case)
+- Team size
+- Timeline (now / soon / later)
+
+CONVERSATION STYLE:
+- Be warm, friendly, and consultative (not pushy)
+- Listen actively and ask follow-up questions
+- Focus on understanding their needs first
+- Use the tools to answer specific questions
+- Keep responses concise and conversational
+- When you don't know something, be honest and offer to find out
+
+IMPORTANT:
+- Use the search_faq tool when they ask about products, pricing, or features
+- Use the collect_lead_info tool to store information as you learn it
+- Use the end_call_summary tool when they say they're done or ready to leave
+- Don't make up information - only use what's in the FAQ""",
+        )
+    
+    @function_tool
+    async def search_faq(self, context: RunContext, query: Annotated[str, "The user's question about the company, product, or pricing"]):
+        """Search the company FAQ for answers to user questions.
+        
+        Args:
+            query: The user's question
+        """
+        logger.info(f"Searching FAQ for: {query}")
+        
+        # Track questions asked
+        if query not in lead_data["questions_asked"]:
+            lead_data["questions_asked"].append(query)
+        
+        answer = search_faq(query)
+        
+        if answer:
+            return f"Based on our FAQ: {answer}"
+        else:
+            # Return general company info
+            return f"I don't have specific information about that in my FAQ. Let me tell you generally: {company_data.get('company', {}).get('description', 'We provide payment solutions for businesses.')}"
+    
+    @function_tool
+    async def collect_lead_info(
+        self, 
+        context: RunContext,
+        field: Annotated[str, "The field name: 'name', 'company', 'email', 'role', 'use_case', 'team_size', or 'timeline'"],
+        value: Annotated[str, "The value to store"]
+    ):
+        """Store lead information as it's collected during the conversation.
+        
+        Args:
+            field: Which field to update
+            value: The value to store
+        """
+        if field in lead_data:
+            lead_data[field] = value
+            logger.info(f"Collected lead info: {field} = {value}")
+            return f"Got it, I've noted that down."
+        else:
+            return "I couldn't store that information."
+    
+    @function_tool
+    async def end_call_summary(self, context: RunContext, summary: Annotated[str, "A brief summary of the conversation and the lead's needs"]):
+        """End the call and provide a summary of the lead.
+        
+        Args:
+            summary: Brief summary of the conversation
+        """
+        lead_data["conversation_summary"] = summary
+        save_lead()
+        
+        # Create verbal summary
+        name = lead_data.get("name", "there")
+        company = lead_data.get("company", "your company")
+        use_case = lead_data.get("use_case", "your needs")
+        timeline = lead_data.get("timeline", "soon")
+        
+        return f"Thank you so much for your time, {name}! I've captured all the details about {company} and your interest in using our solution for {use_case}. Based on our conversation, it sounds like you're looking to move forward {timeline}. I'll make sure our team follows up with you shortly. Have a great day!"
+
 
 def prewarm(proc: JobProcess):
+    """Prewarm the VAD model"""
     proc.userdata["vad"] = silero.VAD.load()
 
+
 async def entrypoint(ctx: JobContext):
-    ctx.log_context_fields = {"room": ctx.room.name}
-
-    print("\n" + "🧬" * 25)
-    print("🚀 STARTING AI TUTOR SESSION")
-    print(f"📚 Loaded {len(COURSE_CONTENT)} topics from Knowledge Base")
+    """Main entrypoint for the SDR agent"""
     
-    # 1. Initialize State
-    userdata = Userdata(tutor_state=TutorState())
-
-    # 2. Setup Agent
+    # Reset lead data for new session
+    global lead_data
+    lead_data = {
+        "name": None,
+        "company": None,
+        "email": None,
+        "role": None,
+        "use_case": None,
+        "team_size": None,
+        "timeline": None,
+        "questions_asked": [],
+        "conversation_summary": None,
+        "timestamp": None
+    }
+    
+    logger.info(f"Starting SDR agent for room: {ctx.room.name}")
+    
+    # Create session with Murf TTS
     session = AgentSession(
-        stt=deepgram.STT(model="nova-3"),
-        llm=google.LLM(model="gemini-2.5-flash"),
-        tts=murf.TTS(
-            voice="en-US-matthew", 
-            style="Promo",        
-            text_pacing=True,
+        stt=deepgram.STT(
+            model="nova-3",
+            language="en-US",
+        ),
+        llm=google.LLM(
+            model="gemini-2.5-flash",
+            temperature=0.7,
+        ),
+        tts=murf_tts.TTS(
+            voice="en-US-ryan",
+            style="Conversational",
+            tokenizer=tokenize.basic.SentenceTokenizer(
+                min_sentence_len=5,
+            ),
         ),
         turn_detection=MultilingualModel(),
         vad=ctx.proc.userdata["vad"],
-        userdata=userdata,
     )
     
-    # 3. Store session in userdata for tools to access
-    userdata.agent_session = session
+    # Metrics collection
+    usage_collector = metrics.UsageCollector()
+
+    @session.on("metrics_collected")
+    def _on_metrics_collected(ev: MetricsCollectedEvent):
+        metrics.log_metrics(ev.metrics)
+        usage_collector.collect(ev.metrics)
+
+    async def log_usage():
+        summary = usage_collector.get_summary()
+        logger.info(f"Usage: {summary}")
+
+    ctx.add_shutdown_callback(log_usage)
+
+    # Start the session with SDR agent
+    sdr = SDRAgent()
     
-    # 4. Start
     await session.start(
-        agent=TutorAgent(),
+        agent=sdr,
         room=ctx.room,
         room_input_options=RoomInputOptions(
-            noise_cancellation=noise_cancellation.BVC()
+            noise_cancellation=noise_cancellation.BVC(),
         ),
     )
 
+    # Join the room
     await ctx.connect()
+
 
 if __name__ == "__main__":
     cli.run_app(WorkerOptions(entrypoint_fnc=entrypoint, prewarm_fnc=prewarm))

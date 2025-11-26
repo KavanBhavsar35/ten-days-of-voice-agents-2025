@@ -1,0 +1,132 @@
+{
+  "company": {
+    "name": "Razorpay",
+    "tagline": "Power your finance, grow your business",
+    "description": "Razorpay is India's leading payment gateway and banking platform for businesses. We enable online and offline payments for over 10 million businesses with our product suite including Payment Gateway, Payment Links, Payment Pages, Subscriptions, Smart Collect, and more.",
+    "founded": "2014",
+    "headquarters": "Bangalore, India",
+    "website": "https://razorpay.com"
+  },
+  "products": [
+    {
+      "name": "Payment Gateway",
+      "description": "Accept payments online with 100+ payment modes including credit cards, debit cards, UPI, wallets, and net banking. Industry-leading success rates and instant settlements.",
+      "use_case": "E-commerce, SaaS, marketplaces, online businesses"
+    },
+    {
+      "name": "Payment Links",
+      "description": "Create and share payment links instantly via SMS, email, or WhatsApp. No coding required. Perfect for businesses without a website.",
+      "use_case": "Freelancers, small businesses, service providers"
+    },
+    {
+      "name": "Payment Pages",
+      "description": "Build custom payment pages in minutes without any coding. Collect payments for products, services, or donations.",
+      "use_case": "Quick product launches, event registrations, donations"
+    },
+    {
+      "name": "Subscriptions",
+      "description": "Automate recurring payments with smart retry logic and dunning management. Support for multiple billing cycles.",
+      "use_case": "SaaS companies, membership sites, subscription boxes"
+    },
+    {
+      "name": "RazorpayX",
+      "description": "Complete banking solution for businesses including current accounts, payroll, vendor payments, and tax payments.",
+      "use_case": "Businesses needing banking and payout solutions"
+    }
+  ],
+  "pricing": {
+    "payment_gateway": {
+      "domestic_cards": "2% per transaction",
+      "international_cards": "3% per transaction",
+      "upi": "Free (limited period offer)",
+      "wallets": "2% per transaction",
+      "net_banking": "₹10 per transaction",
+      "setup_fee": "No setup fee",
+      "annual_maintenance": "No annual maintenance charges"
+    },
+    "payment_links": {
+      "fee": "2% per transaction",
+      "setup": "Free to create unlimited links"
+    },
+    "subscriptions": {
+      "fee": "2% per transaction + ₹3 per invoice",
+      "setup": "No setup fee"
+    },
+    "razorpayx": {
+      "current_account": "Zero balance account with no hidden charges",
+      "payouts": "Starting from ₹3 per payout",
+      "bulk_payouts": "Volume-based discounts available"
+    },
+    "free_tier": "Yes - Payment Links and basic features available for free. Pay only when you receive payments."
+  },
+  "faq": [
+    {
+      "question": "What does Razorpay do?",
+      "answer": "Razorpay is a complete payments and banking platform for businesses in India. We help businesses accept online payments, manage subscriptions, send payouts, and handle all their banking needs through a single platform."
+    },
+    {
+      "question": "Who is Razorpay for?",
+      "answer": "Razorpay is perfect for any business that needs to accept payments online - from freelancers and small businesses to large enterprises. Our customers include e-commerce stores, SaaS companies, educational institutions, NGOs, and marketplaces."
+    },
+    {
+      "question": "Do you have a free tier?",
+      "answer": "Yes! You can start using Razorpay for free. There are no setup fees or annual maintenance charges. You only pay a small transaction fee when you successfully receive payments. Payment Links are completely free to create."
+    },
+    {
+      "question": "How much does it cost?",
+      "answer": "Our pricing is simple and transparent. For domestic card payments, we charge 2% per transaction. UPI payments are currently free. International cards are 3% per transaction. There are no hidden fees, setup charges, or annual maintenance costs."
+    },
+    {
+      "question": "How long does integration take?",
+      "answer": "Integration is very quick! With Payment Links, you can start accepting payments in just 5 minutes without any coding. For Payment Gateway integration, most developers complete it in 2-3 hours. We provide detailed documentation and SDKs for all major programming languages."
+    },
+    {
+      "question": "What payment methods do you support?",
+      "answer": "We support 100+ payment methods including all major credit and debit cards, UPI, net banking from 50+ banks, popular wallets like Paytm and PhonePe, EMI options, and international cards. We're constantly adding new payment methods."
+    },
+    {
+      "question": "Is it secure?",
+      "answer": "Absolutely! Razorpay is PCI DSS Level 1 compliant, which is the highest level of security certification in the payments industry. We use bank-grade encryption and security measures to protect all transactions and customer data."
+    },
+    {
+      "question": "How fast are settlements?",
+      "answer": "We offer instant settlements! You can receive your money in your bank account within seconds of a successful transaction. Standard settlements are T+2 days (transaction day plus 2 working days)."
+    },
+    {
+      "question": "Do you provide support?",
+      "answer": "Yes, we provide 24/7 customer support via email, phone, and chat. Our support team is highly responsive and helps with integration, troubleshooting, and any questions you might have."
+    },
+    {
+      "question": "Can I try before committing?",
+      "answer": "Absolutely! You can sign up for free and test our platform in sandbox mode without processing real transactions. There's no commitment required, and you can start with our free Payment Links to see how it works."
+    },
+    {
+      "question": "What about refunds?",
+      "answer": "Refunds are easy to process through our dashboard. You can issue full or partial refunds instantly. The refund amount is credited back to the customer's original payment method within 5-7 business days."
+    },
+    {
+      "question": "Do you support international payments?",
+      "answer": "Yes! We support international card payments from over 150 countries. You can accept payments in multiple currencies and we handle all the currency conversion automatically."
+    }
+  ],
+  "target_customers": [
+    "E-commerce businesses",
+    "SaaS companies",
+    "Educational institutions",
+    "Freelancers and consultants",
+    "NGOs and non-profits",
+    "Marketplaces",
+    "Subscription-based businesses",
+    "Service providers"
+  ],
+  "key_benefits": [
+    "100+ payment methods in one integration",
+    "Industry-leading success rates (up to 98%)",
+    "Instant settlements available",
+    "No setup or annual fees",
+    "24/7 customer support",
+    "Easy integration with detailed documentation",
+    "PCI DSS Level 1 compliant security",
+    "Powerful dashboard with analytics"
+  ]
+}

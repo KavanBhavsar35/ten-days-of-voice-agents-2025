@@ -6,6 +6,7 @@ import type { AppConfig } from '@/app-config';
 import { ChatTranscript } from '@/components/app/chat-transcript';
 import { PreConnectMessage } from '@/components/app/preconnect-message';
 import { TileLayout } from '@/components/app/tile-layout';
+import { WellnessDisplay } from '@/components/app/wellness-display';
 import {
   AgentControlBar,
   type ControlBarControls,
@@ -111,6 +112,11 @@ export const SessionView = ({
 
       {/* Tile Layout */}
       <TileLayout chatOpen={chatOpen} />
+
+      {/* Wellness Check-in Display */}
+      <div className="fixed top-24 right-4 z-40 max-w-xs">
+        <WellnessDisplay className="max-h-[60vh] overflow-y-auto" />
+      </div>
 
       {/* Bottom */}
       <MotionBottom
