@@ -1,0 +1,770 @@
+{
+  "store_name": "QuickMart Express",
+  "currency": "INR",
+  "currency_symbol": "₹",
+  "categories": [
+    "Groceries",
+    "Dairy & Eggs",
+    "Snacks",
+    "Beverages",
+    "Prepared Foods",
+    "Pasta & Grains",
+    "Condiments & Sauces",
+    "Fruits & Vegetables"
+  ],
+  "items": [
+    {
+      "id": "GR001",
+      "name": "Whole Wheat Bread",
+      "category": "Groceries",
+      "price": 45,
+      "unit": "loaf",
+      "brand": "Nature's Own",
+      "tags": ["vegetarian", "whole-grain"]
+    },
+    {
+      "id": "GR002",
+      "name": "White Bread",
+      "category": "Groceries",
+      "price": 35,
+      "unit": "loaf",
+      "brand": "Wonder",
+      "tags": ["vegetarian"]
+    },
+    {
+      "id": "DA001",
+      "name": "Milk",
+      "category": "Dairy & Eggs",
+      "price": 60,
+      "unit": "litre",
+      "brand": "Organic Valley",
+      "tags": ["vegetarian", "organic"]
+    },
+    {
+      "id": "DA002",
+      "name": "Eggs",
+      "category": "Dairy & Eggs",
+      "price": 90,
+      "unit": "dozen",
+      "brand": "Happy Farms",
+      "tags": ["vegetarian", "protein"]
+    },
+    {
+      "id": "DA003",
+      "name": "Butter",
+      "category": "Dairy & Eggs",
+      "price": 250,
+      "unit": "500g",
+      "brand": "Land O'Lakes",
+      "tags": ["vegetarian"]
+    },
+    {
+      "id": "DA004",
+      "name": "Cheese",
+      "category": "Dairy & Eggs",
+      "price": 450,
+      "unit": "500g",
+      "brand": "Kraft",
+      "tags": ["vegetarian"]
+    },
+    {
+      "id": "CO001",
+      "name": "Peanut Butter",
+      "category": "Condiments & Sauces",
+      "price": 350,
+      "unit": "jar",
+      "brand": "Jif",
+      "tags": ["vegetarian", "protein", "gluten-free"]
+    },
+    {
+      "id": "CO002",
+      "name": "Strawberry Jam",
+      "category": "Condiments & Sauces",
+      "price": 280,
+      "unit": "jar",
+      "brand": "Smucker's",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "CO003",
+      "name": "Tomato Sauce",
+      "category": "Condiments & Sauces",
+      "price": 120,
+      "unit": "jar",
+      "brand": "Prego",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "CO004",
+      "name": "Olive Oil",
+      "category": "Condiments & Sauces",
+      "price": 650,
+      "unit": "bottle",
+      "brand": "Bertolli",
+      "tags": ["vegetarian", "vegan", "healthy"]
+    },
+    {
+      "id": "PA001",
+      "name": "Spaghetti Pasta",
+      "category": "Pasta & Grains",
+      "price": 85,
+      "unit": "box",
+      "brand": "Barilla",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "PA002",
+      "name": "Penne Pasta",
+      "category": "Pasta & Grains",
+      "price": 85,
+      "unit": "box",
+      "brand": "Barilla",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "PA003",
+      "name": "White Rice",
+      "category": "Pasta & Grains",
+      "price": 180,
+      "unit": "bag",
+      "brand": "Uncle Ben's",
+      "tags": ["vegetarian", "vegan", "gluten-free"]
+    },
+    {
+      "id": "SN001",
+      "name": "Potato Chips",
+      "category": "Snacks",
+      "price": 40,
+      "unit": "bag",
+      "brand": "Lay's",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "SN002",
+      "name": "Chocolate Cookies",
+      "category": "Snacks",
+      "price": 60,
+      "unit": "pack",
+      "brand": "Oreo",
+      "tags": ["vegetarian"]
+    },
+    {
+      "id": "SN003",
+      "name": "Granola Bars",
+      "category": "Snacks",
+      "price": 150,
+      "unit": "box",
+      "brand": "Nature Valley",
+      "tags": ["vegetarian", "healthy"]
+    },
+    {
+      "id": "BV001",
+      "name": "Orange Juice",
+      "category": "Beverages",
+      "price": 180,
+      "unit": "carton",
+      "brand": "Tropicana",
+      "tags": ["vegetarian", "vegan", "healthy"]
+    },
+    {
+      "id": "BV002",
+      "name": "Coffee",
+      "category": "Beverages",
+      "price": 450,
+      "unit": "bag",
+      "brand": "Starbucks",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "BV003",
+      "name": "Green Tea",
+      "category": "Beverages",
+      "price": 250,
+      "unit": "box",
+      "brand": "Lipton",
+      "tags": ["vegetarian", "vegan", "healthy"]
+    },
+    {
+      "id": "PF001",
+      "name": "Pepperoni Pizza",
+      "category": "Prepared Foods",
+      "price": 399,
+      "unit": "pizza",
+      "brand": "DiGiorno",
+      "tags": ["ready-to-eat"]
+    },
+    {
+      "id": "PF002",
+      "name": "Veggie Pizza",
+      "category": "Prepared Foods",
+      "price": 349,
+      "unit": "pizza",
+      "brand": "DiGiorno",
+      "tags": ["vegetarian", "ready-to-eat"]
+    },
+    {
+      "id": "PF003",
+      "name": "Chicken Sandwich",
+      "category": "Prepared Foods",
+      "price": 180,
+      "unit": "sandwich",
+      "brand": "QuickMart Deli",
+      "tags": ["ready-to-eat", "protein"]
+    },
+    {
+      "id": "FV001",
+      "name": "Bananas",
+      "category": "Fruits & Vegetables",
+      "price": 50,
+      "unit": "kg",
+      "brand": "Fresh",
+      "tags": ["vegetarian", "vegan", "healthy", "organic"]
+    },
+    {
+      "id": "FV002",
+      "name": "Apples",
+      "category": "Fruits & Vegetables",
+      "price": 150,
+      "unit": "kg",
+      "brand": "Fresh",
+      "tags": ["vegetarian", "vegan", "healthy", "organic"]
+    },
+    {
+      "id": "FV003",
+      "name": "Tomatoes",
+      "category": "Fruits & Vegetables",
+      "price": 40,
+      "unit": "kg",
+      "brand": "Fresh",
+      "tags": ["vegetarian", "vegan", "healthy"]
+    },
+    {
+      "id": "FV004",
+      "name": "Lettuce",
+      "category": "Fruits & Vegetables",
+      "price": 60,
+      "unit": "head",
+      "brand": "Fresh",
+      "tags": ["vegetarian", "vegan", "healthy"]
+    },
+    {
+      "id": "FV005",
+      "name": "Onions",
+      "category": "Fruits & Vegetables",
+      "price": 30,
+      "unit": "kg",
+      "brand": "Fresh",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "FV006",
+      "name": "Garlic",
+      "category": "Fruits & Vegetables",
+      "price": 80,
+      "unit": "bulb",
+      "brand": "Fresh",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "GR003",
+      "name": "Flour",
+      "category": "Groceries",
+      "price": 50,
+      "unit": "kg",
+      "brand": "Pillsbury",
+      "tags": ["vegetarian", "vegan", "baking"]
+    },
+    {
+      "id": "GR004",
+      "name": "Sugar",
+      "category": "Groceries",
+      "price": 45,
+      "unit": "kg",
+      "brand": "Madhur",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "GR005",
+      "name": "Salt",
+      "category": "Groceries",
+      "price": 20,
+      "unit": "kg",
+      "brand": "Tata",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "CO005",
+      "name": "Ketchup",
+      "category": "Condiments & Sauces",
+      "price": 80,
+      "unit": "bottle",
+      "brand": "Maggi",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "CO006",
+      "name": "Mayonnaise",
+      "category": "Condiments & Sauces",
+      "price": 120,
+      "unit": "jar",
+      "brand": "Veeba",
+      "tags": ["vegetarian"]
+    },
+    {
+      "id": "CO007",
+      "name": "Soy Sauce",
+      "category": "Condiments & Sauces",
+      "price": 90,
+      "unit": "bottle",
+      "brand": "Ching's",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "CO008",
+      "name": "Honey",
+      "category": "Condiments & Sauces",
+      "price": 180,
+      "unit": "jar",
+      "brand": "Dabur",
+      "tags": ["vegetarian"]
+    },
+    {
+      "id": "DA005",
+      "name": "Yogurt",
+      "category": "Dairy & Eggs",
+      "price": 50,
+      "unit": "500g",
+      "brand": "Amul",
+      "tags": ["vegetarian"]
+    },
+    {
+      "id": "DA006",
+      "name": "Paneer",
+      "category": "Dairy & Eggs",
+      "price": 90,
+      "unit": "200g",
+      "brand": "Mother Dairy",
+      "tags": ["vegetarian", "protein"]
+    },
+    {
+      "id": "DA007",
+      "name": "Cream",
+      "category": "Dairy & Eggs",
+      "price": 60,
+      "unit": "200ml",
+      "brand": "Amul",
+      "tags": ["vegetarian"]
+    },
+    {
+      "id": "FV007",
+      "name": "Potatoes",
+      "category": "Fruits & Vegetables",
+      "price": 25,
+      "unit": "kg",
+      "brand": "Fresh",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "FV008",
+      "name": "Carrots",
+      "category": "Fruits & Vegetables",
+      "price": 40,
+      "unit": "kg",
+      "brand": "Fresh",
+      "tags": ["vegetarian", "vegan", "healthy"]
+    },
+    {
+      "id": "FV009",
+      "name": "Cucumber",
+      "category": "Fruits & Vegetables",
+      "price": 30,
+      "unit": "kg",
+      "brand": "Fresh",
+      "tags": ["vegetarian", "vegan", "healthy"]
+    },
+    {
+      "id": "FV010",
+      "name": "Bell Peppers",
+      "category": "Fruits & Vegetables",
+      "price": 80,
+      "unit": "kg",
+      "brand": "Fresh",
+      "tags": ["vegetarian", "vegan", "healthy"]
+    },
+    {
+      "id": "FV011",
+      "name": "Spinach",
+      "category": "Fruits & Vegetables",
+      "price": 35,
+      "unit": "bunch",
+      "brand": "Fresh",
+      "tags": ["vegetarian", "vegan", "healthy"]
+    },
+    {
+      "id": "FV012",
+      "name": "Coriander",
+      "category": "Fruits & Vegetables",
+      "price": 20,
+      "unit": "bunch",
+      "brand": "Fresh",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "FV013",
+      "name": "Ginger",
+      "category": "Fruits & Vegetables",
+      "price": 60,
+      "unit": "250g",
+      "brand": "Fresh",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "FV014",
+      "name": "Green Chillies",
+      "category": "Fruits & Vegetables",
+      "price": 40,
+      "unit": "100g",
+      "brand": "Fresh",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "SN004",
+      "name": "Biscuits",
+      "category": "Snacks",
+      "price": 30,
+      "unit": "pack",
+      "brand": "Parle-G",
+      "tags": ["vegetarian"]
+    },
+    {
+      "id": "SN005",
+      "name": "Namkeen",
+      "category": "Snacks",
+      "price": 50,
+      "unit": "pack",
+      "brand": "Haldiram's",
+      "tags": ["vegetarian"]
+    },
+    {
+      "id": "SN006",
+      "name": "Popcorn",
+      "category": "Snacks",
+      "price": 40,
+      "unit": "pack",
+      "brand": "Act II",
+      "tags": ["vegetarian"]
+    },
+    {
+      "id": "BV004",
+      "name": "Water Bottle",
+      "category": "Beverages",
+      "price": 20,
+      "unit": "litre",
+      "brand": "Bisleri",
+      "tags": ["vegan"]
+    },
+    {
+      "id": "BV005",
+      "name": "Soft Drink",
+      "category": "Beverages",
+      "price": 40,
+      "unit": "bottle",
+      "brand": "Coca-Cola",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "PA004",
+      "name": "Noodles",
+      "category": "Pasta & Grains",
+      "price": 35,
+      "unit": "pack",
+      "brand": "Maggi",
+      "tags": ["vegetarian"]
+    },
+    {
+      "id": "PA005",
+      "name": "Oats",
+      "category": "Pasta & Grains",
+      "price": 120,
+      "unit": "kg",
+      "brand": "Quaker",
+      "tags": ["vegetarian", "vegan", "healthy"]
+    },
+    {
+      "id": "PA006",
+      "name": "Poha",
+      "category": "Pasta & Grains",
+      "price": 60,
+      "unit": "kg",
+      "brand": "MTR",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "PF004",
+      "name": "Samosa",
+      "category": "Prepared Foods",
+      "price": 40,
+      "unit": "pack",
+      "brand": "QuickMart Deli",
+      "tags": ["vegetarian", "ready-to-eat"]
+    },
+    {
+      "id": "PF005",
+      "name": "Spring Rolls",
+      "category": "Prepared Foods",
+      "price": 80,
+      "unit": "pack",
+      "brand": "QuickMart Deli",
+      "tags": ["vegetarian", "ready-to-eat"]
+    },
+    {
+      "id": "GR006",
+      "name": "Atta (Wheat Flour)",
+      "category": "Groceries",
+      "price": 55,
+      "unit": "kg",
+      "brand": "Aashirvaad",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "GR007",
+      "name": "Besan (Gram Flour)",
+      "category": "Groceries",
+      "price": 70,
+      "unit": "kg",
+      "brand": "Everest",
+      "tags": ["vegetarian", "vegan", "gluten-free"]
+    },
+    {
+      "id": "PA007",
+      "name": "Dal (Lentils)",
+      "category": "Pasta & Grains",
+      "price": 120,
+      "unit": "kg",
+      "brand": "Tata Sampann",
+      "tags": ["vegetarian", "vegan", "protein"]
+    },
+    {
+      "id": "PA008",
+      "name": "Chickpeas",
+      "category": "Pasta & Grains",
+      "price": 90,
+      "unit": "kg",
+      "brand": "Tata Sampann",
+      "tags": ["vegetarian", "vegan", "protein"]
+    },
+    {
+      "id": "CO009",
+      "name": "Cooking Oil",
+      "category": "Condiments & Sauces",
+      "price": 180,
+      "unit": "litre",
+      "brand": "Fortune",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "CO010",
+      "name": "Ghee",
+      "category": "Condiments & Sauces",
+      "price": 550,
+      "unit": "litre",
+      "brand": "Amul",
+      "tags": ["vegetarian"]
+    },
+    {
+      "id": "CO011",
+      "name": "Pickle",
+      "category": "Condiments & Sauces",
+      "price": 120,
+      "unit": "jar",
+      "brand": "Mother's Recipe",
+      "tags": ["vegetarian"]
+    },
+    {
+      "id": "CO012",
+      "name": "Chutney",
+      "category": "Condiments & Sauces",
+      "price": 80,
+      "unit": "jar",
+      "brand": "Tops",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "SN007",
+      "name": "Nuts Mix",
+      "category": "Snacks",
+      "price": 200,
+      "unit": "pack",
+      "brand": "Nutraj",
+      "tags": ["vegetarian", "vegan", "healthy"]
+    },
+    {
+      "id": "SN008",
+      "name": "Dried Fruits",
+      "category": "Snacks",
+      "price": 250,
+      "unit": "pack",
+      "brand": "Nutraj",
+      "tags": ["vegetarian", "vegan", "healthy"]
+    },
+    {
+      "id": "BV006",
+      "name": "Lassi",
+      "category": "Beverages",
+      "price": 40,
+      "unit": "bottle",
+      "brand": "Amul",
+      "tags": ["vegetarian"]
+    },
+    {
+      "id": "FV015",
+      "name": "Cauliflower",
+      "category": "Fruits & Vegetables",
+      "price": 35,
+      "unit": "kg",
+      "brand": "Fresh",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "FV016",
+      "name": "Cabbage",
+      "category": "Fruits & Vegetables",
+      "price": 30,
+      "unit": "kg",
+      "brand": "Fresh",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "FV017",
+      "name": "Peas",
+      "category": "Fruits & Vegetables",
+      "price": 60,
+      "unit": "kg",
+      "brand": "Fresh",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "FV018",
+      "name": "Beans",
+      "category": "Fruits & Vegetables",
+      "price": 50,
+      "unit": "kg",
+      "brand": "Fresh",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "FV019",
+      "name": "Brinjal (Eggplant)",
+      "category": "Fruits & Vegetables",
+      "price": 40,
+      "unit": "kg",
+      "brand": "Fresh",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "FV020",
+      "name": "Okra (Bhindi)",
+      "category": "Fruits & Vegetables",
+      "price": 45,
+      "unit": "kg",
+      "brand": "Fresh",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "FV021",
+      "name": "Mint Leaves",
+      "category": "Fruits & Vegetables",
+      "price": 20,
+      "unit": "bunch",
+      "brand": "Fresh",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "FV022",
+      "name": "Lemon",
+      "category": "Fruits & Vegetables",
+      "price": 60,
+      "unit": "kg",
+      "brand": "Fresh",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "FV023",
+      "name": "Mango",
+      "category": "Fruits & Vegetables",
+      "price": 120,
+      "unit": "kg",
+      "brand": "Fresh",
+      "tags": ["vegetarian", "vegan", "seasonal"]
+    },
+    {
+      "id": "FV024",
+      "name": "Grapes",
+      "category": "Fruits & Vegetables",
+      "price": 80,
+      "unit": "kg",
+      "brand": "Fresh",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "FV025",
+      "name": "Watermelon",
+      "category": "Fruits & Vegetables",
+      "price": 30,
+      "unit": "kg",
+      "brand": "Fresh",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "FV026",
+      "name": "Papaya",
+      "category": "Fruits & Vegetables",
+      "price": 40,
+      "unit": "kg",
+      "brand": "Fresh",
+      "tags": ["vegetarian", "vegan"]
+    }
+  ],
+  "recipes": {
+    "peanut butter sandwich": ["GR001", "CO001"],
+    "pb&j sandwich": ["GR001", "CO001", "CO002"],
+    "sandwich": ["GR001", "DA004", "FV003", "FV004"],
+    "pasta": ["PA001", "CO003", "CO004"],
+    "spaghetti": ["PA001", "CO003", "CO004", "FV006"],
+    "breakfast": ["GR001", "DA002", "DA003", "BV001"],
+    "omelet": ["DA002", "DA003", "FV003", "FV005"],
+    "omelette": ["DA002", "DA003", "FV003", "FV005"],
+    "salad": ["FV004", "FV003", "FV009", "FV005", "CO004"],
+    "grilled cheese": ["GR002", "DA004", "DA003"],
+    "tea": ["BV003", "DA001", "GR004"],
+    "coffee": ["BV002", "DA001", "GR004"],
+    "poha": ["PA006", "FV007", "FV005", "FV014"],
+    "maggi": ["PA004", "FV003", "FV005"],
+    "noodles": ["PA004", "FV008", "FV010", "CO007"],
+    "fried rice": ["PA003", "FV008", "FV010", "DA002", "CO007"],
+    "curry": ["FV007", "FV003", "FV005", "FV013", "FV006", "CO004"],
+    "soup": ["FV008", "FV003", "FV005", "DA003"],
+    "smoothie": ["FV001", "FV002", "DA001", "CO008"],
+    "pancakes": ["GR003", "DA002", "DA001", "GR004"],
+    "pizza": ["PF001"],
+    "snacks": ["SN001", "SN004", "SN005"],
+    "dal": ["PA007", "FV003", "FV005", "FV013", "FV006"],
+    "roti": ["GR006", "CO009", "GR005"],
+    "chapati": ["GR006", "CO009", "GR005"],
+    "paratha": ["GR006", "CO010", "GR005"],
+    "biryani": ["PA003", "FV005", "FV013", "FV006", "CO009"],
+    "pulao": ["PA003", "FV008", "FV017", "CO010"],
+    "sabzi": ["FV007", "FV003", "FV005", "CO009"],
+    "aloo gobi": ["FV007", "FV015", "FV013", "CO009"],
+    "paneer curry": ["DA006", "FV003", "FV005", "DA007", "CO009"],
+    "chole": ["PA008", "FV003", "FV005", "FV013"],
+    "rajma": ["PA007", "FV003", "FV005", "FV013"],
+    "sambar": ["PA007", "FV003", "FV008", "FV005"],
+    "raita": ["DA005", "FV009", "FV003", "FV021"],
+    "fruit salad": ["FV001", "FV002", "FV023", "FV024", "CO008"],
+    "juice": ["FV002", "FV023", "GR004"],
+    "lassi": ["BV006", "GR004"],
+    "chai": ["BV003", "DA001", "GR004"],
+    "indian breakfast": ["PA006", "GR006", "DA002", "BV003"]
+  }
+}

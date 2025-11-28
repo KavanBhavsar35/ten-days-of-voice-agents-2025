@@ -7,6 +7,7 @@ import { ChatTranscript } from '@/components/app/chat-transcript';
 import { PreConnectMessage } from '@/components/app/preconnect-message';
 import { TileLayout } from '@/components/app/tile-layout';
 import { WellnessDisplay } from '@/components/app/wellness-display';
+import { CartDisplay } from '@/components/app/cart-display';
 import {
   AgentControlBar,
   type ControlBarControls,
@@ -116,6 +117,11 @@ export const SessionView = ({
       {/* Wellness Check-in Display */}
       <div className="fixed top-24 right-4 z-40 max-w-xs">
         <WellnessDisplay className="max-h-[60vh] overflow-y-auto" />
+      </div>
+
+      {/* Cart Display */}
+      <div className="fixed top-24 right-4 z-40 w-80">
+        <CartDisplay messages={messages} />
       </div>
 
       {/* Bottom */}

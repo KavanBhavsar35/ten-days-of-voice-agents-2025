@@ -69,13 +69,14 @@ class TTS(tts.TTS):
             "sampleRate": 24000,
             "channelType": "MONO",
             "encodeAsBase64": False,
-            "speed": 1.0,  # Normal speed
+            "speed": 1.15,  # Slightly faster for more natural flow
             "pitch": 0,    # Normal pitch
         }
         
         try:
             logger.info(f"Synthesizing with Murf: voice={self._voice}, text_length={len(text)}")
-            response = requests.post(url, json=payload, headers=headers, timeout=30)
+            # Reduced timeout for faster failure/retry, increased speed
+            response = requests.post(url, json=payload, headers=headers, timeout=15)
             response.raise_for_status()
             
             # Murf API returns JSON with audio URL or base64 data
