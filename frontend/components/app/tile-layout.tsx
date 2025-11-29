@@ -112,33 +112,32 @@ export function TileLayout({ chatOpen }: TileLayoutProps) {
                   layoutId="agent"
                   initial={{
                     opacity: 0,
-                    scale: 0,
                   }}
                   animate={{
                     opacity: 1,
-                    scale: chatOpen ? 1 : 5,
                   }}
                   transition={{
-                    ...ANIMATION_TRANSITION,
+                    duration: 0.3,
                     delay: animationDelay,
                   }}
                   className={cn(
-                    'bg-background aspect-square h-[90px] rounded-md border border-transparent transition-[border,drop-shadow]',
-                    chatOpen && 'border-input/50 drop-shadow-lg/10 delay-200'
+                    'cyber-panel aspect-square h-[90px] rounded-lg transition-all duration-300',
+                    chatOpen && 'shadow-xl'
                   )}
                 >
                   <BarVisualizer
                     barCount={5}
                     state={agentState}
-                    options={{ minHeight: 5 }}
+                    options={{ minHeight: 6 }}
                     trackRef={agentAudioTrack}
-                    className={cn('flex h-full items-center justify-center gap-1')}
+                    className={cn('flex h-full items-center justify-center gap-2')}
                   >
                     <span
                       className={cn([
-                        'bg-muted min-h-2.5 w-2.5 rounded-full',
-                        'origin-center transition-colors duration-250 ease-linear',
-                        'data-[lk-highlighted=true]:bg-foreground data-[lk-muted=true]:bg-muted',
+                        'bg-cyan-500/40 min-h-2 w-2 rounded-sm',
+                        'origin-center transition-all duration-250 ease-linear',
+                        'data-[lk-highlighted=true]:bg-cyan-400 data-[lk-highlighted=true]:shadow-lg data-[lk-highlighted=true]:shadow-cyan-400/80',
+                        'data-[lk-muted=true]:bg-cyan-500/20',
                       ])}
                     />
                   </BarVisualizer>
@@ -174,8 +173,8 @@ export function TileLayout({ chatOpen }: TileLayoutProps) {
                     },
                   }}
                   className={cn(
-                    'overflow-hidden bg-black drop-shadow-xl/80',
-                    chatOpen ? 'h-[90px]' : 'h-auto w-full'
+                    'overflow-hidden cyber-panel shadow-xl',
+                    chatOpen ? 'h-[90px] rounded-lg' : 'h-auto w-full rounded-lg'
                   )}
                 >
                   <VideoTrack

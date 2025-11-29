@@ -1,9 +1,9 @@
 import logging
 import json
+import random
 from datetime import datetime
 from pathlib import Path
 from typing import Annotated, Optional
-import uuid
 
 from dotenv import load_dotenv
 from livekit.agents import (
@@ -24,422 +24,297 @@ from livekit.plugins import silero, google, deepgram, noise_cancellation
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 import murf_tts
 
-logger = logging.getLogger("grocery_agent")
+logger = logging.getLogger("game_master")
 
 load_dotenv(".env.local")
 
-# Load catalog
-CATALOG_FILE = Path("../shared-data/catalog.json")
-catalog_data = {}
-if CATALOG_FILE.exists():
-    with open(CATALOG_FILE, "r") as f:
-        catalog_data = json.load(f)
-        logger.info(f"Loaded catalog with {len(catalog_data.get('items', []))} items")
+# Load game state
+GAME_STATE_FILE = Path("../shared-data/game_state.json")
+game_state = {}
+if GAME_STATE_FILE.exists():
+    with open(GAME_STATE_FILE, "r", encoding="utf-8") as f:
+        game_state = json.load(f)
+        logger.info(f"Loaded game state for {game_state.get('player', {}).get('name', 'Adventurer')}")
 else:
-    logger.warning(f"Catalog file not found: {CATALOG_FILE}")
-
-# Orders directory
-ORDERS_DIR = Path("../shared-data/orders")
-ORDERS_DIR.mkdir(exist_ok=True)
-
-# Session state
-cart = []
-customer_name = None
+    logger.warning(f"Game state file not found: {GAME_STATE_FILE}")
 
 
-def find_item_by_name(item_name: str):
-    """Find an item in catalog by name (fuzzy match)"""
-    item_name_lower = item_name.lower().strip()
-    
-    # Exact match first
-    for item in catalog_data.get("items", []):
-        if item["name"].lower() == item_name_lower:
-            return item
-    
-    # Partial match
-    for item in catalog_data.get("items", []):
-        if item_name_lower in item["name"].lower() or item["name"].lower() in item_name_lower:
-            return item
-    
-    return None
+def save_game_state():
+    """Save the current game state to JSON"""
+    with open(GAME_STATE_FILE, "w") as f:
+        json.dump(game_state, f, indent=2)
+    logger.info("Game state saved")
 
 
-def find_item_by_id(item_id: str):
-    """Find an item by ID"""
-    for item in catalog_data.get("items", []):
-        if item["id"] == item_id:
-            return item
-    return None
+def roll_dice(sides=20, modifier=0):
+    """Roll a dice with optional modifier"""
+    roll = random.randint(1, sides)
+    total = roll + modifier
+    logger.info(f"Dice roll: d{sides} = {roll} + {modifier} = {total}")
+    return roll, total
 
 
-def get_recipe_items(recipe_name: str):
-    """Get items for a recipe"""
-    recipe_name_lower = recipe_name.lower().strip()
-    recipes = catalog_data.get("recipes", {})
-    
-    # Exact match
-    if recipe_name_lower in recipes:
-        return recipes[recipe_name_lower]
-    
-    # Partial match
-    for recipe, items in recipes.items():
-        if recipe_name_lower in recipe or recipe in recipe_name_lower:
-            return items
-    
-    return None
+def get_stat_modifier(stat_value):
+    """Convert stat value to D&D-style modifier"""
+    return (stat_value - 10) // 2
 
 
-def calculate_cart_total():
-    """Calculate total price of items in cart"""
-    total = 0.0
-    for cart_item in cart:
-        total += cart_item["price"] * cart_item["quantity"]
-    return round(total, 0)  # INR doesn't use decimals typically
-
-
-def save_order():
-    """Save the current order to a JSON file"""
-    if not cart:
-        return None
-    
-    order_id = str(uuid.uuid4())[:8]
-    order = {
-        "order_id": order_id,
-        "customer_name": customer_name or "Guest",
-        "timestamp": datetime.now().isoformat(),
-        "status": "received",
-        "items": cart.copy(),
-        "total": calculate_cart_total(),
-        "delivery_address": "123 Main St (Demo)"
-    }
-    
-    # Save to individual order file
-    order_file = ORDERS_DIR / f"order_{order_id}.json"
-    with open(order_file, "w") as f:
-        json.dump(order, f, indent=2)
-    
-    # Also append to order history
-    history_file = ORDERS_DIR / "order_history.json"
-    history = []
-    if history_file.exists():
-        with open(history_file, "r") as f:
-            try:
-                history = json.load(f)
-            except:
-                history = []
-    
-    history.append(order)
-    
-    with open(history_file, "w") as f:
-        json.dump(history, f, indent=2)
-    
-    logger.info(f"Order {order_id} saved with {len(cart)} items, total: ${calculate_cart_total()}")
-    
-    return order
-
-
-class GroceryOrderingAgent(Agent):
+class GameMasterAgent(Agent):
     def __init__(self) -> None:
-        store_name = catalog_data.get("store_name", "QuickMart")
-        categories = ", ".join(catalog_data.get("categories", []))
+        player_name = game_state.get("player", {}).get("name", "Adventurer")
+        player_class = game_state.get("player", {}).get("class", "Warrior")
+        location = game_state.get("current_location", {}).get("name", "Unknown")
         
         super().__init__(
-            instructions=f"""You are a friendly and helpful shopping assistant for {store_name}, a food and grocery delivery service.
+            instructions=f"""You are an epic Game Master running a fantasy D&D-style adventure!
 
-YOUR ROLE:
-Help customers order groceries and food items through natural conversation. You can:
-1. Add items to their cart
-2. Handle recipe/meal requests (like "ingredients for pasta")
-3. Show what's in their cart
-4. Update quantities or remove items
-5. Place the final order
+SETTING: High Fantasy World
+You are guiding {player_name}, a brave {player_class}, through an immersive adventure filled with danger, mystery, and glory!
 
-CONVERSATION FLOW:
+CURRENT SITUATION:
+- Player: {player_name} the {player_class}
+- Location: {location}
+- Your role: Describe vivid scenes, create tension, and guide the story
 
-1. GREETING:
-   - "Hi! Welcome to {store_name}! I can help you order groceries and food."
-   - "What would you like to order today?"
-   - Optionally ask for their name
+YOUR GM STYLE:
+1. IMMERSIVE STORYTELLING
+   - Paint vivid scenes with sensory details
+   - Create atmosphere and tension
+   - Use dramatic pauses and emphasis
+   - Make NPCs memorable with distinct personalities
 
-2. TAKING ORDERS:
-   - Listen for specific items: "I need milk", "Add bread to my cart"
-   - Listen for recipe requests: "I want to make pasta", "Get me ingredients for a sandwich"
-   - For specific items, use add_to_cart directly (skip search_item for speed)
-   - Use the add_recipe_items tool for recipe/meal requests
-   - Always confirm what you're adding briefly
+2. PLAYER AGENCY
+   - Always end with "What do you do?" or similar prompt
+   - Present 2-3 clear options when helpful
+   - Let player make meaningful choices
+   - React dynamically to unexpected actions
 
-3. CART MANAGEMENT:
-   - Use add_to_cart to add items with quantities
-   - Use remove_from_cart to remove items
-   - Use update_quantity to change amounts
-   - Use show_cart to display current cart
-   - Always confirm changes verbally
+3. PACING
+   - Keep descriptions concise but evocative (2-3 sentences)
+   - Balance action, exploration, and roleplay
+   - Build tension gradually
+   - Reward creativity and bold choices
 
-4. CLARIFICATIONS:
-   - If multiple items match, ask which one they want
-   - If quantity isn't specified, assume 1
-   - If they say "bread", ask if they want whole wheat or white
+4. MECHANICS
+   - Use the tools to track stats, inventory, and events
+   - Call for dice rolls during risky actions
+   - Apply stat modifiers to outcomes
+   - Update game state after important events
 
-5. PLACING ORDER:
-   - When they say "that's all", "place my order", "checkout", or "I'm done"
-   - Use show_cart to review the order
-   - Confirm the total
-   - Use place_order to finalize
-   - Thank them and confirm order is placed
+5. TONE
+   - Epic and dramatic, but not overly serious
+   - Celebrate player victories
+   - Make failures interesting, not punishing
+   - Keep it fun and engaging!
 
 IMPORTANT RULES:
-- Be conversational and friendly, not robotic
-- Confirm each addition: "I've added 2 litres of milk to your cart"
-- For recipes, explain what you're adding: "For pasta, I'm adding spaghetti, tomato sauce, olive oil, and garlic"
-- If an item isn't found, suggest similar items or ask them to try another name
-- Keep responses natural and helpful
-- Always use the tools - don't make up prices or availability
+- ALWAYS use tools to check/update game state
+- Roll dice for combat, skill checks, and risky actions
+- Track HP, inventory, and quest progress
+- Remember past events and NPC interactions
+- Keep responses under 50 words unless describing a major scene
+- End EVERY response with a question or prompt for action
 
-TONE:
-- Friendly and upbeat
-- Patient with clarifications
-- Excited about food!
-- Professional but warm
+EXAMPLE OPENING:
+"Thunder crashes as you stand before the Crimson Citadel. Its blood-red towers pierce storm clouds crackling with dark magic. You grip your Shadowfang Blade. Lord Malachar awaits within. This ends tonight. What do you do?"
 
-AVAILABLE CATEGORIES:
-{categories}
+MAKE IT EPIC:
+- Use vivid, cinematic descriptions
+- Create tension and urgency
+- Make every choice feel important
+- Reward bold actions
+- Punish recklessness but keep it fun
+- Use emojis for dramatic effect (⚔️💀🔥⚡)
 
-Remember: You're here to make grocery shopping easy and enjoyable!""",
+Remember: You're creating a LEGENDARY adventure! Make every moment count!""",
         )
     
     @function_tool
-    async def search_item(
-        self, 
-        context: RunContext,
-        item_name: Annotated[str, "The name of the item to search for"]
-    ):
-        """Search for an item in the catalog by name.
+    async def get_player_stats(self, context: RunContext):
+        """Get the player's current stats, HP, and inventory.
         
-        Args:
-            item_name: The name of the item to search for
+        Returns player character information.
         """
-        logger.info(f"Searching for item: {item_name}")
+        player = game_state.get("player", {})
+        stats = player.get("stats", {})
+        inventory = player.get("inventory", [])
         
-        item = find_item_by_name(item_name)
+        info = f"""Player: {player.get('name')} the {player.get('class')}
+Level {player.get('level')} | HP: {player.get('hp')}/{player.get('max_hp')}
+STR: {stats.get('strength')} | INT: {stats.get('intelligence')} | DEX: {stats.get('dexterity')}
+Inventory: {', '.join(inventory)}
+Gold: {player.get('gold')} coins"""
         
-        if item:
-            return f"Found: {item['name']} - ₹{item['price']} per {item['unit']} ({item['brand']}). Available to add to cart."
-        else:
-            # Suggest items from same category or similar
-            suggestions = []
-            for cat_item in catalog_data.get("items", [])[:5]:
-                suggestions.append(cat_item["name"])
-            
-            return f"Sorry, I couldn't find '{item_name}'. Some items we have: {', '.join(suggestions)}. Try searching for one of these?"
+        logger.info(f"Player stats retrieved: {player.get('name')}")
+        return info
     
     @function_tool
-    async def add_to_cart(
-        self, 
+    async def roll_check(
+        self,
         context: RunContext,
-        item_name: Annotated[str, "The name of the item to add"],
-        quantity: Annotated[int, "The quantity to add"] = 1
+        check_type: Annotated[str, "Type of check: strength, intelligence, dexterity, charisma, or luck"],
+        difficulty: Annotated[int, "Difficulty (5=easy, 10=medium, 15=hard, 20=very hard)"] = 10
     ):
-        """Add an item to the shopping cart.
+        """Roll a skill check with player's stat modifier.
         
         Args:
-            item_name: The name of the item
-            quantity: How many to add (default 1)
+            check_type: Which stat to use
+            difficulty: Target number to beat
         """
-        logger.info(f"Adding to cart: {quantity}x {item_name}")
+        stats = game_state.get("player", {}).get("stats", {})
+        stat_value = stats.get(check_type.lower(), 10)
+        modifier = get_stat_modifier(stat_value)
         
-        item = find_item_by_name(item_name)
+        roll, total = roll_dice(20, modifier)
+        success = total >= difficulty
         
-        if not item:
-            return f"Sorry, I couldn't find '{item_name}' in our catalog. Try searching for it first?"
+        result = f"🎲 {check_type.upper()} Check: Rolled {roll} + {modifier} = {total}"
+        if success:
+            result += f" ✅ SUCCESS! (needed {difficulty})"
+        else:
+            result += f" ❌ FAILED (needed {difficulty})"
         
-        # Check if item already in cart
-        for cart_item in cart:
-            if cart_item["id"] == item["id"]:
-                cart_item["quantity"] += quantity
-                logger.info(f"Updated quantity for {item['name']}: {cart_item['quantity']}")
-                return f"Updated! You now have {cart_item['quantity']} {item['unit']}(s) of {item['name']} in your cart."
+        logger.info(f"Check: {check_type} vs DC{difficulty} = {total} ({'success' if success else 'fail'})")
+        return result
+    
+    @function_tool
+    async def update_hp(
+        self,
+        context: RunContext,
+        change: Annotated[int, "HP change (positive for healing, negative for damage)"],
+        reason: Annotated[str, "Reason for HP change"]
+    ):
+        """Update player's HP.
         
-        # Add new item to cart
-        cart_item = {
-            "id": item["id"],
-            "name": item["name"],
-            "price": item["price"],
-            "unit": item["unit"],
-            "quantity": quantity
+        Args:
+            change: Amount to change HP by
+            reason: Why HP changed
+        """
+        player = game_state.get("player", {})
+        old_hp = player.get("hp", 100)
+        player["hp"] = max(0, min(player.get("max_hp", 100), old_hp + change))
+        
+        save_game_state()
+        
+        if change > 0:
+            result = f"💚 Healed {change} HP! Now at {player['hp']}/{player['max_hp']} HP. ({reason})"
+        else:
+            result = f"💔 Took {abs(change)} damage! Now at {player['hp']}/{player['max_hp']} HP. ({reason})"
+            if player["hp"] == 0:
+                result += " ⚠️ CRITICAL CONDITION!"
+        
+        logger.info(f"HP updated: {old_hp} → {player['hp']} ({reason})")
+        return result
+    
+    @function_tool
+    async def update_inventory(
+        self,
+        context: RunContext,
+        action: Annotated[str, "Action: 'add' or 'remove'"],
+        item: Annotated[str, "Item name"]
+    ):
+        """Add or remove items from player inventory.
+        
+        Args:
+            action: 'add' or 'remove'
+            item: Item name
+        """
+        inventory = game_state.get("player", {}).get("inventory", [])
+        
+        if action == "add":
+            inventory.append(item)
+            result = f"📦 Added {item} to inventory!"
+            logger.info(f"Added item: {item}")
+        elif action == "remove":
+            if item in inventory:
+                inventory.remove(item)
+                result = f"📤 Removed {item} from inventory."
+                logger.info(f"Removed item: {item}")
+            else:
+                result = f"❌ {item} not in inventory."
+        else:
+            result = "Invalid action. Use 'add' or 'remove'."
+        
+        save_game_state()
+        return result
+    
+    @function_tool
+    async def update_location(
+        self,
+        context: RunContext,
+        location_name: Annotated[str, "New location name"],
+        description: Annotated[str, "Location description"]
+    ):
+        """Update player's current location.
+        
+        Args:
+            location_name: Name of new location
+            description: Description of the location
+        """
+        game_state["current_location"] = {
+            "name": location_name,
+            "description": description,
+            "available_paths": []
         }
-        cart.append(cart_item)
         
-        logger.info(f"Added {quantity}x {item['name']} to cart")
-        return f"Added {quantity} {item['unit']}(s) of {item['name']} to your cart (₹{item['price']} each)."
+        save_game_state()
+        
+        logger.info(f"Location changed to: {location_name}")
+        return f"📍 Arrived at: {location_name}"
     
     @function_tool
-    async def add_recipe_items(
-        self, 
+    async def record_event(
+        self,
         context: RunContext,
-        recipe_name: Annotated[str, "The name of the recipe or meal (e.g., 'pasta', 'sandwich', 'breakfast')"]
+        event_description: Annotated[str, "What happened"]
     ):
-        """Add all ingredients needed for a recipe or meal to the cart.
+        """Record an important event in the game history.
         
         Args:
-            recipe_name: The recipe or meal name
+            event_description: Description of the event
         """
-        logger.info(f"Adding recipe items for: {recipe_name}")
+        events = game_state.get("events", [])
+        events.append({
+            "description": event_description,
+            "timestamp": datetime.now().isoformat()
+        })
+        game_state["events"] = events
         
-        item_ids = get_recipe_items(recipe_name)
+        save_game_state()
         
-        if not item_ids:
-            return f"I don't have a recipe for '{recipe_name}'. Try asking for specific items instead, or try: pasta, sandwich, breakfast, omelet, or salad."
+        logger.info(f"Event recorded: {event_description}")
+        return f"📝 Recorded: {event_description}"
+    
+    @function_tool
+    async def update_quest(
+        self,
+        context: RunContext,
+        quest_id: Annotated[str, "Quest identifier"],
+        status: Annotated[str, "Quest status: available, active, completed, or failed"]
+    ):
+        """Update quest status.
         
-        added_items = []
-        for item_id in item_ids:
-            item = find_item_by_id(item_id)
-            if item:
-                # Check if already in cart
-                found = False
-                for cart_item in cart:
-                    if cart_item["id"] == item["id"]:
-                        cart_item["quantity"] += 1
-                        found = True
-                        break
+        Args:
+            quest_id: Quest ID
+            status: New status
+        """
+        quests = game_state.get("quests", [])
+        for quest in quests:
+            if quest.get("id") == quest_id:
+                quest["status"] = status
+                save_game_state()
                 
-                if not found:
-                    cart.append({
-                        "id": item["id"],
-                        "name": item["name"],
-                        "price": item["price"],
-                        "unit": item["unit"],
-                        "quantity": 1
-                    })
+                if status == "completed":
+                    result = f"🎉 Quest Completed: {quest.get('title')}!"
+                elif status == "active":
+                    result = f"⚔️ Quest Active: {quest.get('title')}"
+                else:
+                    result = f"📜 Quest {status}: {quest.get('title')}"
                 
-                added_items.append(item["name"])
+                logger.info(f"Quest updated: {quest_id} → {status}")
+                return result
         
-        logger.info(f"Added {len(added_items)} items for {recipe_name}")
-        items_list = ", ".join(added_items)
-        return f"Great! For {recipe_name}, I've added: {items_list} to your cart."
-    
-    @function_tool
-    async def remove_from_cart(
-        self, 
-        context: RunContext,
-        item_name: Annotated[str, "The name of the item to remove"]
-    ):
-        """Remove an item from the shopping cart.
-        
-        Args:
-            item_name: The name of the item to remove
-        """
-        logger.info(f"Removing from cart: {item_name}")
-        
-        item_name_lower = item_name.lower()
-        
-        for i, cart_item in enumerate(cart):
-            if item_name_lower in cart_item["name"].lower():
-                removed = cart.pop(i)
-                logger.info(f"Removed {removed['name']} from cart")
-                return f"Removed {removed['name']} from your cart."
-        
-        return f"I couldn't find '{item_name}' in your cart."
-    
-    @function_tool
-    async def update_quantity(
-        self, 
-        context: RunContext,
-        item_name: Annotated[str, "The name of the item to update"],
-        new_quantity: Annotated[int, "The new quantity"]
-    ):
-        """Update the quantity of an item in the cart.
-        
-        Args:
-            item_name: The name of the item
-            new_quantity: The new quantity
-        """
-        logger.info(f"Updating quantity: {item_name} to {new_quantity}")
-        
-        item_name_lower = item_name.lower()
-        
-        for cart_item in cart:
-            if item_name_lower in cart_item["name"].lower():
-                old_qty = cart_item["quantity"]
-                cart_item["quantity"] = new_quantity
-                logger.info(f"Updated {cart_item['name']} quantity: {old_qty} -> {new_quantity}")
-                return f"Updated {cart_item['name']} quantity to {new_quantity}."
-        
-        return f"I couldn't find '{item_name}' in your cart."
-    
-    @function_tool
-    async def show_cart(self, context: RunContext):
-        """Show all items currently in the shopping cart with quantities and total.
-        """
-        logger.info("Showing cart")
-        
-        if not cart:
-            return "Your cart is empty. What would you like to order?"
-        
-        cart_summary = "Here's what's in your cart:\n"
-        for cart_item in cart:
-            item_total = cart_item["price"] * cart_item["quantity"]
-            cart_summary += f"- {cart_item['quantity']} {cart_item['unit']}(s) of {cart_item['name']} (₹{cart_item['price']} each = ₹{item_total})\n"
-        
-        total = calculate_cart_total()
-        cart_summary += f"\nTotal: ₹{total}"
-        
-        return cart_summary
-    
-    @function_tool
-    async def place_order(
-        self, 
-        context: RunContext,
-        customer_name_input: Annotated[Optional[str], "Customer's name (optional)"] = None
-    ):
-        """Place the final order and save it.
-        
-        Args:
-            customer_name_input: Optional customer name
-        """
-        global customer_name
-        
-        if customer_name_input:
-            customer_name = customer_name_input
-        
-        logger.info(f"Placing order for {customer_name or 'Guest'}")
-        
-        if not cart:
-            return "Your cart is empty! Add some items before placing an order."
-        
-        order = save_order()
-        
-        if order:
-            order_summary = f"Order placed successfully! Order ID: {order['order_id']}\n\n"
-            order_summary += f"Items ordered:\n"
-            for item in order["items"]:
-                order_summary += f"- {item['quantity']}x {item['name']}\n"
-            order_summary += f"\nTotal: ₹{order['total']}\n"
-            order_summary += f"Status: {order['status']}\n"
-            order_summary += f"Estimated delivery: 30-45 minutes\n\n"
-            order_summary += "Thank you for shopping with us!"
-            
-            # Clear cart after order
-            cart.clear()
-            
-            return order_summary
-        else:
-            return "Sorry, there was an error placing your order. Please try again."
-    
-    @function_tool
-    async def set_customer_name(
-        self, 
-        context: RunContext,
-        name: Annotated[str, "The customer's name"]
-    ):
-        """Set the customer's name for the order.
-        
-        Args:
-            name: Customer's name
-        """
-        global customer_name
-        customer_name = name
-        logger.info(f"Customer name set to: {name}")
-        return f"Great! I'll put this order under {name}."
+        return f"Quest {quest_id} not found."
 
 
 def prewarm(proc: JobProcess):
@@ -448,16 +323,11 @@ def prewarm(proc: JobProcess):
 
 
 async def entrypoint(ctx: JobContext):
-    """Main entrypoint for the grocery ordering agent"""
+    """Main entrypoint for the Game Master agent"""
     
-    # Reset session state for new call
-    global cart, customer_name
-    cart = []
-    customer_name = None
+    logger.info(f"Starting Game Master session for room: {ctx.room.name}")
     
-    logger.info(f"Starting grocery ordering session for room: {ctx.room.name}")
-    
-    # Create session with Murf TTS - Optimized for speed
+    # Create session with Murf TTS
     session = AgentSession(
         stt=deepgram.STT(
             model="nova-3",
@@ -465,13 +335,13 @@ async def entrypoint(ctx: JobContext):
         ),
         llm=google.LLM(
             model="gemini-2.5-flash",
-            temperature=0.6,  # Lower for faster, more consistent responses
+            temperature=0.8,  # Higher for creative storytelling
         ),
         tts=murf_tts.TTS(
             voice="en-US-ryan",
-            style="Conversational",
+            style="Narration",  # Dramatic narration style
             tokenizer=tokenize.basic.SentenceTokenizer(
-                min_sentence_len=50,  # Much larger chunks = fewer pauses
+                min_sentence_len=30,  # Longer for storytelling
             ),
         ),
         turn_detection=MultilingualModel(),
@@ -489,20 +359,14 @@ async def entrypoint(ctx: JobContext):
     async def log_usage():
         summary = usage_collector.get_summary()
         logger.info(f"Usage: {summary}")
-        
-        # Log final cart state
-        if cart:
-            logger.info(f"Session ended with {len(cart)} items in cart (not ordered)")
-        else:
-            logger.info("Session ended with empty cart")
 
     ctx.add_shutdown_callback(log_usage)
 
-    # Start the session with grocery agent
-    grocery_agent = GroceryOrderingAgent()
+    # Start the session with Game Master
+    gm = GameMasterAgent()
     
     await session.start(
-        agent=grocery_agent,
+        agent=gm,
         room=ctx.room,
         room_input_options=RoomInputOptions(
             noise_cancellation=noise_cancellation.BVC(),

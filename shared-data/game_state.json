@@ -1,0 +1,108 @@
+{
+  "player": {
+    "name": "Draven Shadowblade",
+    "class": "Shadow Knight",
+    "level": 5,
+    "hp": 115,
+    "max_hp": 150,
+    "stats": {
+      "strength": 18,
+      "intelligence": 14,
+      "dexterity": 16,
+      "charisma": 12,
+      "luck": 15
+    },
+    "inventory": [
+      "\u2694\ufe0f Shadowfang Blade (Legendary)",
+      "\ud83d\udee1\ufe0f Dragon Scale Armor",
+      "\ud83d\udc8e Crystal of Eternal Light",
+      "\ud83e\uddea Phoenix Elixir x3",
+      "\ud83d\udcdc Scroll of Fireball",
+      "\ud83d\udddd\ufe0f Ancient Vault Key"
+    ],
+    "gold": 500
+  },
+  "current_location": {
+    "name": "The Whispering Woods",
+    "description": "A dense, ancient forest shrouded in an ethereal mist, where ancient trees whisper secrets and unseen eyes watch from the shadows.",
+    "available_paths": []
+  },
+  "npcs": [
+    {
+      "name": "Zara the Mystic",
+      "role": "Ancient Sorceress",
+      "attitude": "mysterious",
+      "alive": true,
+      "met": false
+    },
+    {
+      "name": "Lord Malachar",
+      "role": "Dark Overlord",
+      "attitude": "hostile",
+      "alive": true,
+      "met": false
+    },
+    {
+      "name": "Finn the Rogue",
+      "role": "Thief Companion",
+      "attitude": "friendly",
+      "alive": true,
+      "met": false
+    }
+  ],
+  "quests": [
+    {
+      "id": "main_quest",
+      "title": "\u2694\ufe0f Shatter the Dark Crown",
+      "description": "Lord Malachar's reign of terror must end. Destroy his crown to break his immortality.",
+      "status": "active",
+      "objectives": [
+        "Find the Throne Room",
+        "Defeat Lord Malachar",
+        "Destroy the Dark Crown"
+      ]
+    },
+    {
+      "id": "side_quest_1",
+      "title": "\ud83d\udd2e The Mystic's Secret",
+      "description": "Zara knows something about your past. Discover the truth.",
+      "status": "available",
+      "objectives": []
+    }
+  ],
+  "events": [
+    {
+      "description": "\u26a1 Entered the Crimson Citadel",
+      "timestamp": "2025-11-28T23:00:00"
+    },
+    {
+      "description": "\ud83d\udde1\ufe0f Defeated the Shadow Guards",
+      "timestamp": "2025-11-28T23:05:00"
+    },
+    {
+      "description": "Draven Shadowblade arrives at the Crimson Citadel to confront Lord Malachar.",
+      "timestamp": "2025-11-29T00:39:42.387179"
+    },
+    {
+      "description": "Adventure begins: Draven enters The Whispering Woods.",
+      "timestamp": "2025-11-29T00:59:09.180382"
+    },
+    {
+      "description": "Draven engaged skeletal figures in combat in the Whispering Woods.",
+      "timestamp": "2025-11-29T01:01:31.710760"
+    },
+    {
+      "description": "Draven Shadowblade begins his adventure in the Whispering Woods.",
+      "timestamp": "2025-11-29T19:23:21.857768"
+    },
+    {
+      "description": "Draven attempted to accept the whispers of the woods but was overwhelmed, taking psychic damage and experiencing a reality warp.",
+      "timestamp": "2025-11-29T19:51:22.084023"
+    }
+  ],
+  "world_state": {
+    "time_of_day": "midnight",
+    "weather": "thunderstorm",
+    "danger_level": "extreme"
+  }
+}

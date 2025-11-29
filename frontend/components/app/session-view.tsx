@@ -7,7 +7,7 @@ import { ChatTranscript } from '@/components/app/chat-transcript';
 import { PreConnectMessage } from '@/components/app/preconnect-message';
 import { TileLayout } from '@/components/app/tile-layout';
 import { WellnessDisplay } from '@/components/app/wellness-display';
-import { CartDisplay } from '@/components/app/cart-display';
+import { CharacterSheet } from '@/components/app/character-sheet';
 import {
   AgentControlBar,
   type ControlBarControls,
@@ -83,6 +83,8 @@ export const SessionView = ({
     screenShare: appConfig.supportsVideoInput,
   };
 
+  const [particles, setParticles] = useState<Array<{x: number, y: number, targetX: number, targetY: number, duration: number}>>([]);
+
   useEffect(() => {
     const lastMessage = messages.at(-1);
     const lastMessageIsLocal = lastMessage?.from?.isLocal === true;
@@ -92,8 +94,80 @@ export const SessionView = ({
     }
   }, [messages]);
 
+  useEffect(() => {
+    // Generate particles only on client side
+    const newParticles = [...Array(20)].map(() => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      targetX: Math.random() * window.innerWidth,
+      targetY: Math.random() * window.innerHeight,
+      duration: 10 + Math.random() * 20,
+    }));
+    setParticles(newParticles);
+  }, []);
+
+  const { from, ...rest} = messages 
+
   return (
-    <section className="bg-background relative z-10 h-full w-full overflow-hidden" {...props}>
+    <section className="relative z-10 h-full w-full overflow-hidden bg-black" {...props}>
+      {/* Cyberpunk Grid Background */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]" />
+      
+      {/* Neon Glow Orbs */}
+      <div className="absolute inset-0 overflow-hidden">
+        <motion.div
+          className="absolute top-20 left-20 w-96 h-96 bg-cyan-500 rounded-full filter blur-[120px] opacity-20"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.2, 0.3, 0.2],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+        />
+        <motion.div
+          className="absolute bottom-20 right-20 w-96 h-96 bg-purple-500 rounded-full filter blur-[120px] opacity-20"
+          animate={{
+            scale: [1, 1.3, 1],
+            opacity: [0.2, 0.3, 0.2],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+        />
+      </div>
+      
+      {/* Floating Particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {particles.map((particle, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-0.5 h-0.5 bg-cyan-400 rounded-full"
+            style={{
+              boxShadow: '0 0 2px #00ffff',
+            }}
+            initial={{
+              x: particle.x,
+              y: particle.y,
+            }}
+            animate={{
+              y: [null, particle.targetY],
+              x: [null, particle.targetX],
+              opacity: [0, 0.6, 0],
+            }}
+            transition={{
+              duration: particle.duration,
+              repeat: Infinity,
+              ease: 'linear',
+            }}
+          />
+        ))}
+      </div>
+
       {/* Chat Transcript */}
       <div
         className={cn(
@@ -114,15 +188,11 @@ export const SessionView = ({
       {/* Tile Layout */}
       <TileLayout chatOpen={chatOpen} />
 
-      {/* Wellness Check-in Display */}
-      <div className="fixed top-24 right-4 z-40 max-w-xs">
-        <WellnessDisplay className="max-h-[60vh] overflow-y-auto" />
+      {/* Character Sheet Display */}
+      <div className="fixed top-24 right-4 z-40 w-80">
+        <CharacterSheet messages={messages} />
       </div>
 
-      {/* Cart Display */}
-      <div className="fixed top-24 right-4 z-40 w-80">
-        <CartDisplay messages={messages} />
-      </div>
 
       {/* Bottom */}
       <MotionBottom
