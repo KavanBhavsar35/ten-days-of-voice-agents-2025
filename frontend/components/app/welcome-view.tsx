@@ -1,78 +1,20 @@
 import { Button } from '@/components/livekit/button';
-import { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
-import { Sword, Sparkles, Mic, Shield, Flame } from 'lucide-react';
 
 function WelcomeImage() {
   return (
-    <motion.div
-      initial={{ scale: 0, rotate: -180 }}
-      animate={{ scale: 1, rotate: 0 }}
-      transition={{ duration: 0.6, type: "spring", bounce: 0.5 }}
-      className="relative mb-8"
+    <svg
+      width="64"
+      height="64"
+      viewBox="0 0 64 64"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="text-fg0 mb-4 size-16"
     >
-      <motion.div
-        animate={{
-          scale: [1, 1.05, 1],
-          rotate: [0, 3, -3, 0],
-        }}
-        transition={{
-          duration: 4,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-        className="relative"
-      >
-        <div className="absolute inset-0 bg-linear-to-r from-amber-600/30 to-orange-600/30 blur-3xl rounded-full" />
-        <div className="relative bg-linear-to-br from-amber-900/30 to-orange-900/30 p-8 rounded-3xl border-2 border-amber-600/50 shadow-2xl">
-          <Sword className="w-20 h-20 text-amber-400" strokeWidth={1.5} />
-          <motion.div
-            animate={{
-              y: [0, -10, 0],
-              opacity: [0.5, 1, 0.5],
-              rotate: [0, 10, -10, 0]
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            className="absolute -top-2 -right-2"
-          >
-            <Sparkles className="w-8 h-8 text-yellow-400 fill-yellow-400" />
-          </motion.div>
-          <motion.div
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.3, 0.6, 0.3]
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 0.5
-            }}
-            className="absolute -bottom-2 -left-2"
-          >
-            <Shield className="w-6 h-6 text-amber-500" />
-          </motion.div>
-          <motion.div
-            animate={{
-              scale: [1, 1.3, 1],
-              opacity: [0.4, 0.8, 0.4]
-            }}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className="absolute top-0 left-0"
-          >
-            <Flame className="w-5 h-5 text-orange-500" />
-          </motion.div>
-        </div>
-      </motion.div>
-    </motion.div>
+      <path
+        d="M15 24V40C15 40.7957 14.6839 41.5587 14.1213 42.1213C13.5587 42.6839 12.7956 43 12 43C11.2044 43 10.4413 42.6839 9.87868 42.1213C9.31607 41.5587 9 40.7957 9 40V24C9 23.2044 9.31607 22.4413 9.87868 21.8787C10.4413 21.3161 11.2044 21 12 21C12.7956 21 13.5587 21.3161 14.1213 21.8787C14.6839 22.4413 15 23.2044 15 24ZM22 5C21.2044 5 20.4413 5.31607 19.8787 5.87868C19.3161 6.44129 19 7.20435 19 8V56C19 56.7957 19.3161 57.5587 19.8787 58.1213C20.4413 58.6839 21.2044 59 22 59C22.7956 59 23.5587 58.6839 24.1213 58.1213C24.6839 57.5587 25 56.7957 25 56V8C25 7.20435 24.6839 6.44129 24.1213 5.87868C23.5587 5.31607 22.7956 5 22 5ZM32 13C31.2044 13 30.4413 13.3161 29.8787 13.8787C29.3161 14.4413 29 15.2044 29 16V48C29 48.7957 29.3161 49.5587 29.8787 50.1213C30.4413 50.6839 31.2044 51 32 51C32.7956 51 33.5587 50.6839 34.1213 50.1213C34.6839 49.5587 35 48.7957 35 48V16C35 15.2044 34.6839 14.4413 34.1213 13.8787C33.5587 13.3161 32.7956 13 32 13ZM42 21C41.2043 21 40.4413 21.3161 39.8787 21.8787C39.3161 22.4413 39 23.2044 39 24V40C39 40.7957 39.3161 41.5587 39.8787 42.1213C40.4413 42.6839 41.2043 43 42 43C42.7957 43 43.5587 42.6839 44.1213 42.1213C44.6839 41.5587 45 40.7957 45 40V24C45 23.2044 44.6839 22.4413 44.1213 21.8787C43.5587 21.3161 42.7957 21 42 21ZM52 17C51.2043 17 50.4413 17.3161 49.8787 17.8787C49.3161 18.4413 49 19.2044 49 20V44C49 44.7957 49.3161 45.5587 49.8787 46.1213C50.4413 46.6839 51.2043 47 52 47C52.7957 47 53.5587 46.6839 54.1213 46.1213C54.6839 45.5587 55 44.7957 55 44V20C55 19.2044 54.6839 18.4413 54.1213 17.8787C53.5587 17.3161 52.7957 17 52 17Z"
+        fill="currentColor"
+      />
+    </svg>
   );
 }
 
@@ -86,179 +28,34 @@ export const WelcomeView = ({
   onStartCall,
   ref,
 }: React.ComponentProps<'div'> & WelcomeViewProps) => {
-  const [particles, setParticles] = useState<Array<{ x: number, y: number, targetX: number, targetY: number, duration: number }>>([]);
-
-  useEffect(() => {
-    // Generate particles only on client side
-    const newParticles = [...Array(50)].map(() => ({
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * window.innerHeight,
-      targetX: Math.random() * window.innerWidth,
-      targetY: Math.random() * window.innerHeight,
-      duration: 20 + Math.random() * 40,
-    }));
-    setParticles(newParticles);
-  }, []);
-
   return (
-    <div ref={ref} className="relative h-full w-full overflow-hidden bg-black">
-      {/* Cyberpunk Grid Background */}
-      <div className="absolute inset-0 bg-[linear-linear(rgba(0,255,255,0.03)_1px,transparent_1px),linear-linear(90deg,rgba(0,255,255,0.03)_1px,transparent_1px)] bg-size-[50px_50px]" />
+    <div ref={ref}>
+      <section className="bg-background h-screen flex flex-col items-center justify-center text-center">
+        <WelcomeImage />
 
-      {/* Neon Glow Orbs */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          className="absolute top-20 left-20 w-96 h-96 bg-cyan-500 rounded-full filter blur-[120px] opacity-20"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.2, 0.3, 0.2],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-        />
-        <motion.div
-          className="absolute bottom-20 right-20 w-96 h-96 bg-purple-500 rounded-full filter blur-[120px] opacity-20"
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.2, 0.3, 0.2],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-        />
-        <motion.div
-          className="absolute top-1/2 left-1/2 w-96 h-96 bg-pink-500 rounded-full filter blur-[120px] opacity-15"
-          animate={{
-            scale: [1, 1.4, 1],
-            x: [-50, 50, -50],
-          }}
-          transition={{
-            duration: 12,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-        />
-      </div>
+        <p className="text-foreground max-w-prose pt-1 leading-6 font-medium">
+          Chat live with your voice AI agent
+        </p>
 
-      {/* Floating Particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {particles.map((particle, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-0.5 h-0.5 bg-cyan-400 rounded-full"
-            style={{
-              boxShadow: '0 0 2px #00ffff',
-            }}
-            initial={{
-              x: particle.x,
-              y: particle.y,
-            }}
-            animate={{
-              y: [null, particle.targetY],
-              x: [null, particle.targetX],
-              opacity: [0, 0.6, 0],
-            }}
-            transition={{
-              duration: particle.duration,
-              repeat: Infinity,
-              ease: 'linear',
-            }}
-          />
-        ))}
-      </div>
-
-      <section className="relative flex flex-col items-center justify-center text-center px-4 h-full">
-        {/* Cyberpunk Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="cyber-card max-w-2xl w-full p-12"
-        >
-          {/* Icon */}
-          {/* <motion.div
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ duration: 0.6, delay: 0.2, type: "spring", bounce: 0.4 }}
-            className="mb-8 inline-block"
-          >
-            <div className="relative">
-              <div className="absolute inset-0 bg-cyan-500/30 blur-xl rounded-lg" />
-              <div className="relative bg-black/80 backdrop-blur-sm p-6 rounded-lg border-2 border-cyan-500/50 neon-border">
-                <Sword className="w-16 h-16 text-cyan-400" strokeWidth={2} />
-              </div>
-            </div>
-          </motion.div> */}
-          <WelcomeImage />
-
-          {/* Title */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-          >
-            <h1 className="text-5xl md:text-6xl font-black mb-4 text-cyan-400 neon-text tracking-tight">
-              VOICE GAME MASTER
-            </h1>
-            <p className="text-xl text-purple-400 font-bold mb-2 tracking-wide">
-              EPIC D&D-STYLE ADVENTURE
-            </p>
-            <p className="text-gray-400 max-w-md mx-auto text-base leading-relaxed">
-              Embark on a voice-powered fantasy adventure where your choices shape the story
-            </p>
-          </motion.div>
-
-          {/* Button */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.5, duration: 0.4 }}
-            className="mt-10"
-          >
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={onStartCall}
-              className="cyber-button w-64 h-14 text-lg font-bold transition-all duration-300 hover:scale-105"
-            >
-              <Mic className="w-5 h-5 mr-2" />
-              {startButtonText}
-            </Button>
-          </motion.div>
-
-          {/* Feature Tags */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.7, duration: 0.5 }}
-            className="mt-10 flex flex-wrap gap-3 justify-center"
-          >
-            {[
-              { icon: '⚔️', text: 'COMBAT' },
-              { icon: '🗺️', text: 'EXPLORATION' },
-              { icon: '🎭', text: 'ROLEPLAY' },
-              { icon: '🎲', text: 'DICE ROLLS' }
-            ].map((item, i) => (
-              <motion.span
-                key={item.text}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                whileHover={{ scale: 1.05, y: -2 }}
-                transition={{ delay: 0.8 + i * 0.1 }}
-                className="cyber-tag px-4 py-2 text-xs font-bold tracking-wider"
-              >
-                <span className="mr-1.5">{item.icon}</span>
-                {item.text}
-              </motion.span>
-            ))}
-          </motion.div>
-        </motion.div>
+        <Button variant="primary" size="lg" onClick={onStartCall} className="mt-6 w-64 font-mono">
+          {startButtonText}
+        </Button>
       </section>
+
+      <div className="fixed bottom-5 left-0 flex w-full items-center justify-center">
+        <p className="text-muted-foreground max-w-prose pt-1 text-xs leading-5 font-normal text-pretty md:text-sm">
+          Need help getting set up? Check out the{' '}
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://docs.livekit.io/agents/start/voice-ai/"
+            className="underline"
+          >
+            Voice AI quickstart
+          </a>
+          .
+        </p>
+      </div>
     </div>
   );
 };

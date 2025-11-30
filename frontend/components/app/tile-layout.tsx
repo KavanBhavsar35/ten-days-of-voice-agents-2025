@@ -125,7 +125,7 @@ export function TileLayout({ chatOpen }: TileLayoutProps) {
                     chatOpen && 'shadow-xl'
                   )}
                 >
-                  <BarVisualizer
+                  {/* <BarVisualizer
                     barCount={5}
                     state={agentState}
                     options={{ minHeight: 6 }}
@@ -140,7 +140,7 @@ export function TileLayout({ chatOpen }: TileLayoutProps) {
                         'data-[lk-muted=true]:bg-cyan-500/20',
                       ])}
                     />
-                  </BarVisualizer>
+                  </BarVisualizer> */}
                 </MotionContainer>
               )}
 
